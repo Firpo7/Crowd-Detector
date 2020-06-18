@@ -2,7 +2,7 @@
   "name": "progettoIoT",
   "version": "1.0.0",
   "description": "",
-  "main": "test-db.js",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "knex": "^0.21.1",
     "pg": "^8.2.1"
   }
 }
