@@ -53,6 +53,12 @@ function getBuildingsFromDB(res, name) {
   }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }) })
 }
 
+function getSimpleStatisticsFromDB(res, listOfIdSensors) {
+  knex.select('sensor_id','current_people').from('sensor_data').whereIn('sensor_id', listOfIdSensors).orderBy('time','desc').limit(1).then((rows) => {
+    res.send({code: APIconstants.API_CODE_SUCCESS, datas: rows})
+  }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+}
+
 function getStatisticsFromDB(res, listOfIdSensors, operation, option_range) {
   let dayColumn = knex.ref(knex.raw('concat( EXTRACT(MONTH FROM time), \'-\', EXTRACT(DAY FROM time))')).as('day')
   let query = knex('sensor_data').whereIn('sensor_id', listOfIdSensors)
@@ -136,6 +142,16 @@ function getStatisticsController(req, res) {
   getStatisticsFromDB(res, ids, req.query.operation.toLowerCase(), req.query.optionRange.toLowerCase())
 }
 
+function getSimpleStatisticsController(req, res) {
+  if ( !( req.query.id && (typeof(req.query.id)==='string' || req.query.id instanceof Array) )) {
+    res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
+    return
+  }
+  let ids = getListOf(req.query.id)
+  getSimpleStatisticsFromDB(res, ids)
+}
+
+exports.getSimpleStatistics = getSimpleStatisticsController
 exports.getNodes = getNodesController;
 exports.getBuildings = getBuildingController;
 exports.getStatistics = getStatisticsController;

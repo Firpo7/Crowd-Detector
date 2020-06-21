@@ -21,6 +21,10 @@ app.get(APIconstants.API_ENDPOINT_GET_STAT, (req, res) => {
   ClientAPI.getStatistics(req, res)
 });
 
+app.get(APIconstants.API_ENDPOINT_GET_SIMPLE_STAT, (req, res) => {
+  ClientAPI.getSimpleStatistics(req, res)
+});
+
 
 
 app.post(APIconstants.API_ENDPOINT_REGISTER_NEW_NODE, (req, res) => {
