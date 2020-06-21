@@ -1,5 +1,11 @@
 const { Client } = require('pg');
 const redis = require('redis')
+const mqttHandler = require('./MqttHandler')
+
+var mqttClient = new mqttHandler('ws://localhost:3000');
+mqttClient.connect();
+
+var topic_subscribed = new Set()
 
 const port_redis = process.env.REDIS_PORT || 6379;
 const redis_client = redis.createClient(port_redis);
@@ -24,6 +30,22 @@ function generateRandomID() {
   return (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
 }
 
+
+function subscribeToTopic(topic) {
+  if(!(topic in topic_subscribed)) {
+    mqttClient.subscribe(topic)
+    topic_subscribed.add(topic)
+  }
+}
+
+async function publishOnMqtt(public_id, dataCurrent, dataNew) {
+  subscribeToTopic(public_id)
+  mqttClient.sendMessage(public_id, JSON.stringify({
+    'public_id': public_id,
+    'current_people': dataCurrent,
+    'new_people': dataNew
+  }))
+}
 
 function insertDataIntoDB(res, table, data, ret) {
   knex.insert(data).into(table).then(() => {
@@ -71,30 +93,35 @@ function deleteNodeDB(res, private_id) {
   })
 }
 
+function insertIntoDBAndPublishMqtt(res, public_id, dataCurrent, dataNew) {
+  let data = {
+    'sensor_id': public_id,
+    'time': new Date(),
+    'current_people': dataCurrent,
+    'new_people': dataNew
+  };
+
+  knex.insert(data).into('sensor_data').then(() => {
+    res.send({code: APIconstants.API_CODE_SUCCESS})
+    publishOnMqtt(public_id, dataCurrent, dataNew)
+  }).catch((err) => {
+    res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)
+  })
+
+}
+
 function insertSensorDataDB(res, private_id, dataCurrent, dataNew) {
   redis_client.get(private_id, (err, public_id) => {
     if (err) { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) }
 
-    data = {
-      'time': new Date(),
-      'current_people': dataCurrent,
-      'new_people': dataNew
-    }
     //if no match found in redis
     if (public_id != null) {
-      insertDataIntoDB(res, 'sensor_data', {
-        'sensor_id': public_id,
-        ...data
-      })
+      insertIntoDBAndPublishMqtt(res, public_id, dataCurrent, dataNew)
     } else {
-      //proceed to next middleware function
       knex.select('public_id').from('sensor').where('private_id', private_id).then((rows) => {
         let public_id = rows[0].public_id
-        redis_client.setex(private_id, 3600, public_id);
-        insertDataIntoDB(res, 'sensor_data', {
-          'sensor_id': public_id,
-          ...data
-        })
+        redis_client.setex(private_id, 36000, public_id);
+        insertIntoDBAndPublishMqtt(res, public_id, dataCurrent, dataNew)
       }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
     }
   });
@@ -151,7 +178,7 @@ function updateCrowdController(req, res) {
 }
 
 
-function manageAdminRequests(req, res, callback) {
+async function manageAdminRequests(req, res, callback) {
   let token = req.body.token
   if(!token) { res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS }); return}
 
