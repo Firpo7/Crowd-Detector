@@ -1,4 +1,9 @@
 const { Client } = require('pg');
+const redis = require('redis')
+
+const port_redis = process.env.REDIS_PORT || 6379;
+const redis_client = redis.createClient(port_redis);
+
 var APIconstants = require('./APIConstants').constants;
 
 var knex = require('knex')({
@@ -20,9 +25,9 @@ function generateRandomID() {
 }
 
 
-function insertDataIntoDB(res, table, data) {
+function insertDataIntoDB(res, table, data, ret) {
   knex.insert(data).into(table).then(() => {
-    res.send({code: APIconstants.API_CODE_SUCCESS})
+    res.send({code: APIconstants.API_CODE_SUCCESS, ...ret})
   }).catch((err) => {
     res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)
   })
@@ -31,7 +36,7 @@ function insertDataIntoDB(res, table, data) {
 function insertNewNodeDB(res, name, max_people, type, floor, building) {
   let publicID = generateRandomID()
   let privateID = generateRandomID()
-  knex.insert({
+  insertDataIntoDB(res, 'sensor', {
     'public_id' : publicID,
     'private_id' : privateID,
     'name' : name,
@@ -39,11 +44,7 @@ function insertNewNodeDB(res, name, max_people, type, floor, building) {
     'floor' : floor,
     'roomtype' : type,
     'building' : building,
-  }).into('sensor').then(() => {
-    res.send({code: APIconstants.API_CODE_SUCCESS, id: privateID})
-  }).catch((err) => {
-    res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)
-  })
+  }, {id: privateID})
 }
 
 function insertNewBuildingDB(res, name, address, numFloors) {
@@ -71,15 +72,32 @@ function deleteNodeDB(res, private_id) {
 }
 
 function insertSensorDataDB(res, private_id, dataCurrent, dataNew) {
-  knex.select('public_id').from('sensor').where('private_id', private_id).then((rows) => {
-    let public_id = rows[0].public_id
-    insertDataIntoDB(res, 'sensor_data', {
-      'sensor_id': public_id,
+  redis_client.get(private_id, (err, public_id) => {
+    if (err) { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) }
+
+    data = {
       'time': new Date(),
       'current_people': dataCurrent,
       'new_people': dataNew
-    })
-  }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+    }
+    //if no match found in redis
+    if (public_id != null) {
+      insertDataIntoDB(res, 'sensor_data', {
+        'sensor_id': public_id,
+        ...data
+      })
+    } else {
+      //proceed to next middleware function
+      knex.select('public_id').from('sensor').where('private_id', private_id).then((rows) => {
+        let public_id = rows[0].public_id
+        redis_client.setex(private_id, 3600, public_id);
+        insertDataIntoDB(res, 'sensor_data', {
+          'sensor_id': public_id,
+          ...data
+        })
+      }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+    }
+  });
 }
 
 
