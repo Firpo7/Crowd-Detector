@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS SENSOR(
 	maxPeople integer NOT NULL,
 	roomType VARCHAR (50) NOT NULL,
 	building VARCHAR(50) NOT NULL,
-	FOREIGN KEY (building) REFERENCES BUILDING(name)
+	FOREIGN KEY (building) REFERENCES BUILDING(name) on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS SENSOR_DATA(
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS SENSOR_DATA(
 	new_people REAL NOT NULL,
 	sensor_id UUID NOT NULL,
 	PRIMARY KEY (time, sensor_id),
-	FOREIGN KEY (sensor_id) REFERENCES SENSOR(public_id)
+	FOREIGN KEY (sensor_id) REFERENCES SENSOR(public_id) on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS TOKEN(

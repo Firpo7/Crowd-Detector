@@ -31,6 +31,10 @@ app.post(APIconstants.API_ENDPOINT_DELETE_BUILDINGS, (req, res) => {
   ServerAPI.manageAdminRequests(req, res, ServerAPI.deleteBuilding)
 });
 
+app.post(APIconstants.API_ENDPOINT_DELETE_NODE, (req, res) => {
+  ServerAPI.deleteNode(req, res)
+});
+
 app.listen(port, () => {
   console.log(`listening on port ${ port }`);
 });

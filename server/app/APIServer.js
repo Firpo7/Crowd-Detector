@@ -59,6 +59,14 @@ function deleteBuildingDB(res, name) {
   })
 }
 
+function deleteNodeDB(res, private_id) {
+  knex('sensor').where('private_id', private_id).del().then(() => {
+    res.send({code: APIconstants.API_CODE_SUCCESS})
+  }).catch((err) => {
+    res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)
+  })
+}
+
 
 function registerNewNodeController(req, res) {
   console.log(req.body)
@@ -91,6 +99,14 @@ function deleteBuildingController(req, res) {
   deleteBuildingDB(res, req.body.name)
 }
 
+function deleteNodeController(req, res) {
+  if( !( req.body.id && typeof(req.body.id)==='string' ) ) {
+    res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
+    return
+  }
+  deleteNodeDB(res, req.body.id)
+}
+
 
 function manageAdminRequests(req, res, callback) {
   let token = req.body.token
@@ -103,6 +119,7 @@ function manageAdminRequests(req, res, callback) {
 }
 
 
+exports.deleteNode = deleteNodeController;
 exports.deleteBuilding = deleteBuildingController;
 exports.registerNewNode = registerNewNodeController;
 exports.registerNewBuilding = registerNewBuildingController;
