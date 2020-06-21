@@ -39,6 +39,10 @@ app.post(APIconstants.API_ENDPOINT_DELETE_NODE, (req, res) => {
   ServerAPI.deleteNode(req, res)
 });
 
+app.post(APIconstants.API_ENDPOINT_UPDATE_CROWD, (req, res) => {
+  ServerAPI.updateCrowd(req, res)
+});
+
 app.listen(port, () => {
   console.log(`listening on port ${ port }`);
 });

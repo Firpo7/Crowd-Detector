@@ -20,6 +20,13 @@ function generateRandomID() {
 }
 
 
+function insertDataIntoDB(res, table, data) {
+  knex.insert(data).into(table).then(() => {
+    res.send({code: APIconstants.API_CODE_SUCCESS})
+  }).catch((err) => {
+    res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)
+  })
+}
 
 function insertNewNodeDB(res, name, max_people, type, floor, building) {
   let publicID = generateRandomID()
@@ -40,15 +47,11 @@ function insertNewNodeDB(res, name, max_people, type, floor, building) {
 }
 
 function insertNewBuildingDB(res, name, address, numFloors) {
-  knex.insert({
+  insertDataIntoDB(res, 'building', {
     'name' : name,
     'address' : address,
     'numfloors' : numFloors
-  }).into('building').then(() => {
-    res.send({code: APIconstants.API_CODE_SUCCESS})
-  }).catch((err) => {
-    res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)
-  })
+  });
 }
 
 function deleteBuildingDB(res, name) {
@@ -67,9 +70,20 @@ function deleteNodeDB(res, private_id) {
   })
 }
 
+function insertSensorDataDB(res, private_id, dataCurrent, dataNew) {
+  knex.select('public_id').from('sensor').where('private_id', private_id).then((rows) => {
+    let public_id = rows[0].public_id
+    insertDataIntoDB(res, 'sensor_data', {
+      'sensor_id': public_id,
+      'time': new Date(),
+      'current_people': dataCurrent,
+      'new_people': dataNew
+    })
+  }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+}
+
 
 function registerNewNodeController(req, res) {
-  console.log(req.body)
   if( !( req.body.name && typeof(req.body.name)==='string' ) ||
       !( req.body.max_people && typeof(req.body.max_people)==='string' ) ||
       !( req.body.type && typeof(req.body.type)==='string' ) ||
@@ -107,6 +121,17 @@ function deleteNodeController(req, res) {
   deleteNodeDB(res, req.body.id)
 }
 
+function updateCrowdController(req, res) {
+  if( !( req.body.id && typeof(req.body.id)==='string' ) ||
+      !( req.body.current && typeof(req.body.current)==='string' ) ||
+      !( req.body.new && typeof(req.body.new)==='string' )) {
+        res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
+        return
+  }
+
+  insertSensorDataDB(res, req.body.id, req.body.current, req.body.new)
+}
+
 
 function manageAdminRequests(req, res, callback) {
   let token = req.body.token
@@ -119,6 +144,7 @@ function manageAdminRequests(req, res, callback) {
 }
 
 
+exports.updateCrowd = updateCrowdController;
 exports.deleteNode = deleteNodeController;
 exports.deleteBuilding = deleteBuildingController;
 exports.registerNewNode = registerNewNodeController;
