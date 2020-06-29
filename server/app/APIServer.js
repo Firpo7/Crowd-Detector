@@ -1,4 +1,3 @@
-const { Client } = require('pg');
 const redis = require('redis')
 
 const port_redis = process.env.REDIS_PORT || 6379;
@@ -25,79 +24,45 @@ function generateRandomID() {
 }
 
 
-function insertDataIntoDB(res, table, data, ret) {
-  knex.insert(data).into(table).then(() => {
-    res.send({code: APIconstants.API_CODE_SUCCESS, ...ret})
+function insertDataIntoDB(table, data) {
+  let toPromise = function(resolve, reject) {knex.insert(data).into(table).then(() => {
+    resolve()
   }).catch((err) => {
-    res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)
-  })
+    reject(err)
+  })};
+  return new Promise(toPromise)
 }
 
-function insertNewNodeDB(res, name, max_people, type, floor, building) {
-  let publicID = generateRandomID()
-  let privateID = generateRandomID()
-  insertDataIntoDB(res, 'sensor', {
-    'public_id' : publicID,
-    'private_id' : privateID,
-    'name' : name,
-    'maxpeople' : max_people,
-    'floor' : floor,
-    'roomtype' : type,
-    'building' : building,
-  }, {id: privateID})
+function deleteFromDB(table, where) {
+  let toPromise = function( resolve, reject ) {
+    knex(table).where(where).del().then(() => {
+      resolve()
+    }).catch((err) => {
+      reject(err)
+    })
+  }
+  return new Promise(toPromise)
 }
 
-function insertNewBuildingDB(res, name, address, numFloors) {
-  insertDataIntoDB(res, 'building', {
-    'name' : name,
-    'address' : address,
-    'numfloors' : numFloors
-  });
-}
 
-function deleteBuildingDB(res, name) {
-  knex("building").where('name', name).del().then(() => {
-    res.send({code: APIconstants.API_CODE_SUCCESS})
-  }).catch((err) => {
-    res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)
-  })
-}
-
-function deleteNodeDB(res, private_id) {
-  knex('sensor').where('private_id', private_id).del().then(() => {
-    res.send({code: APIconstants.API_CODE_SUCCESS})
-  }).catch((err) => {
-    res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)
-  })
-}
-
-function insertSensorDataDB(res, private_id, dataCurrent, dataNew) {
-  redis_client.get(private_id, (err, public_id) => {
-    if (err) { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) }
-
-    data = {
-      'time': new Date(),
-      'current_people': dataCurrent,
-      'new_people': dataNew
-    }
-    //if no match found in redis
-    if (public_id != null) {
-      insertDataIntoDB(res, 'sensor_data', {
-        'sensor_id': public_id,
-        ...data
-      })
-    } else {
-      //proceed to next middleware function
-      knex.select('public_id').from('sensor').where('private_id', private_id).then((rows) => {
-        let public_id = rows[0].public_id
-        redis_client.setex(private_id, 3600, public_id);
-        insertDataIntoDB(res, 'sensor_data', {
-          'sensor_id': public_id,
-          ...data
-        })
-      }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
-    }
-  });
+function getPublicID(private_id) {
+  let toPromise = function(resolve, reject) {
+    redis_client.get(private_id, (err, public_id) => {
+      if (err) { reject(err) }
+      
+      //if no match found in redis
+      if (public_id != null) {
+        resolve(public_id)
+      } else {
+        knex.select('public_id').from('sensor').where('private_id', private_id).then((rows) => {
+          let public_id = rows[0].public_id
+          redis_client.setex(private_id, 3600, public_id);
+          resolve(public_id)
+        }).catch((err) => { reject(err) })
+      }
+    });
+  }
+  return new Promise(toPromise)
 }
 
 
@@ -110,7 +75,19 @@ function registerNewNodeController(req, res) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
-  insertNewNodeDB(res, req.body.name, req.body.max_people, req.body.type, req.body.floor, req.body.building)
+
+  let public_id = generateRandomID()
+  let private_id = generateRandomID()
+  insertDataIntoDB('sensor', {
+    'public_id' : public_id,
+    'private_id' : private_id,
+    'name' : req.body.name,
+    'maxpeople' : req.body.max_people,
+    'floor' : req.body.floor,
+    'roomtype' : req.body.type,
+    'building' : req.body.building
+  }).then(() => { res.send({code: APIconstants.API_CODE_SUCCESS, id: public_id}) })
+  .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
 }
 
 function registerNewBuildingController(req, res) {
@@ -120,7 +97,12 @@ function registerNewBuildingController(req, res) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
-  insertNewBuildingDB(res, req.body.name, req.body.address, req.body.numFloors)
+  insertDataIntoDB('building', {
+    'name' : req.body.name,
+    'address' : req.body.address,
+    'numfloors' : req.body.numFloors
+  }).then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
+  .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
 }
 
 function deleteBuildingController(req, res) {
@@ -128,7 +110,9 @@ function deleteBuildingController(req, res) {
     res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
     return
   }
-  deleteBuildingDB(res, req.body.name)
+  deleteFromDB('building', {'name': req.body.name})
+  .then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
+  .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
 }
 
 function deleteNodeController(req, res) {
@@ -136,7 +120,9 @@ function deleteNodeController(req, res) {
     res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
     return
   }
-  deleteNodeDB(res, req.body.id)
+  deleteFromDB('sensor', {'private_id': req.body.id})
+  .then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
+  .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
 }
 
 function updateCrowdController(req, res) {
@@ -147,7 +133,14 @@ function updateCrowdController(req, res) {
         return
   }
 
-  insertSensorDataDB(res, req.body.id, req.body.current, req.body.new)
+  getPublicID(req.body.id)
+  .then((public_id) => insertDataIntoDB('sensor_data', {
+    'sensor_id': public_id,
+    'time': new Date(),
+    'current_people': req.body.current,
+    'new_people': req.body.new
+  })).then(() => { res.send({code: APIconstants.API_CODE_SUCCESS}) })
+  .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
 }
 
 
