@@ -169,6 +169,7 @@ function manageAdminRequests(req, res, callback) {
     knex.select('validity').from('token').where('token', token).then((rows) =>{
       // save it in cache before a possible exit
       redis_client.setex(token, 3600, rows[0].validity);
+      if(!rows.length || new Date(rows[0].validity) < new Date()) { res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS }); return }
       callback(req, res)
     }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
 
