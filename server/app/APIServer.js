@@ -1,7 +1,9 @@
 const redis = require('redis')
 
-const port_redis = process.env.REDIS_PORT || 6379;
-const redis_client = redis.createClient(port_redis);
+const redis_port = process.env.REDIS_PORT || 6379;
+const redis_host = process.env.REDIS_HOST || 'localhost';
+
+const redis_client = redis.createClient(redis_port, redis_host);
 
 var APIconstants = require('./APIConstants').constants;
 
@@ -44,6 +46,13 @@ function deleteFromDB(table, where) {
   return new Promise(toPromise)
 }
 
+function deleteFromCache(key) {
+  let toPromise = function( resolve, reject ) {
+    redis_client.del(key)
+    resolve()
+  }
+  return new Promise(toPromise)
+}
 
 function getPublicID(private_id) {
   let toPromise = function(resolve, reject) {
@@ -121,6 +130,7 @@ function deleteNodeController(req, res) {
     return
   }
   deleteFromDB('sensor', {'private_id': req.body.id})
+  .then(() => deleteFromCache(req.body.id))
   .then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
   .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
 }
@@ -143,15 +153,26 @@ function updateCrowdController(req, res) {
   .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
 }
 
-
 function manageAdminRequests(req, res, callback) {
   let token = req.body.token
   if(!token) { res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS }); return}
 
-  knex.select('validity').from('token').where('token', token).then((rows) =>{
-    if(!rows.length && new Date(rows[0].validity) < new Date()) { res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS }); return }
+  redis_client.get(token, (err, validity) => {
+    if (err) { reject(err) }
+      
+    //if no match found in redis
+    if (validity != null) {
+      if (new Date(validity) < new Date()) { res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS }); return }
+      callback(req,res) ; return
+    }
+
+    knex.select('validity').from('token').where('token', token).then((rows) =>{
+      // save it in cache before a possible exit
+      redis_client.setex(token, 3600, rows[0].validity);
       callback(req, res)
-  }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+    }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+
+  })
 }
 
 
