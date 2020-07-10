@@ -39,21 +39,23 @@ function subscribeToTopic(topic) {
   }
 }
 
-async function publishOnMqtt(public_id, dataCurrent, dataNew) {
-  subscribeToTopic(public_id)
-  mqttClient.sendMessage(public_id, JSON.stringify({
-    'public_id': public_id,
-    'current_people': dataCurrent,
-    'new_people': dataNew
-  }))
+async function publishOnMqtt(topic, data) {
+  let toPromise = function(resolve, reject) {
+    subscribeToTopic(topic)
+    mqttClient.sendMessage(topic, JSON.stringify(data));
+    resolve()
+  }
+  return new Promise(toPromise)
 }
 
 function insertDataIntoDB(table, data) {
-  let toPromise = function(resolve, reject) {knex.insert(data).into(table).then(() => {
-    resolve()
-  }).catch((err) => {
-    reject(err)
-  })};
+  let toPromise = function(resolve, reject) {
+    knex.insert(data).into(table).then(() => {
+      resolve()
+    }).catch((err) => {
+      reject(err)
+    })
+  };
   return new Promise(toPromise)
 }
 
@@ -76,39 +78,37 @@ function deleteFromCache(key) {
   return new Promise(toPromise)
 }
 
-function insertIntoDBAndPublishMqtt(res, public_id, dataCurrent, dataNew) {
-  let data = {
-    'sensor_id': public_id,
-    'time': new Date(),
-    'current_people': dataCurrent,
-    'new_people': dataNew
-  };
-
-  knex.insert(data).into('sensor_data').then(() => {
-    res.send({code: APIconstants.API_CODE_SUCCESS})
-    publishOnMqtt(public_id, dataCurrent, dataNew)
-  }).catch((err) => {
-    res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)
-  })
-
+function getNodesInfo(public_id) {
+  let toPromise = function(resolve, reject) {
+    redis_client.get(public_id, (err, sensor_info) => {
+      if (err) { reject(err) }
+      
+      //if no match found in redis
+      if (sensor_info != null) {
+        sensor_info = JSON.parse(sensor_info)
+        resolve(sensor_info)
+      } else {
+        knex.select([knex.ref('public_id').as('id'), 'name', 'floor', 'roomtype', 'building']).from('sensor').where('public_id', public_id).then((rows) => {
+          if (!rows.length) reject("no sensor found")
+          let sensor_info = rows[0]
+          redis_client.setex(public_id, 3600, JSON.stringify(sensor_info));
+          resolve(sensor_info)
+        }).catch((err) => { reject(err) })
+      }
+    });
+  }
+  return new Promise(toPromise)
 }
 
-function insertSensorDataDB(res, private_id, dataCurrent, dataNew) {
-  redis_client.get(private_id, (err, public_id) => {
-    if (err) { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) }
+function publishSensorDataOnMqtt(public_id, data) {
+  getNodesInfo(public_id)
+  .then((sensor_info) => {
+    let data = {...data, name: sensor_info.name}
+    publishOnMqtt(sensor_info.building+"-"+sensor_info.floor, data)
+    publishOnMqtt(sensor_info.building+"-"+sensor_info.roomtype, data)
+  })
+}
 
-    //if no match found in redis
-    if (public_id != null) {
-      insertIntoDBAndPublishMqtt(res, public_id, dataCurrent, dataNew)
-    } else {
-      knex.select('public_id').from('sensor').where('private_id', private_id).then((rows) => {
-        let public_id = rows[0].public_id
-        redis_client.setex(private_id, 36000, public_id);
-        insertIntoDBAndPublishMqtt(res, public_id, dataCurrent, dataNew)
-      }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
-    }
-  });
-  
 function getPublicID(private_id) {
   let toPromise = function(resolve, reject) {
     redis_client.get(private_id, (err, public_id) => {
@@ -119,6 +119,7 @@ function getPublicID(private_id) {
         resolve(public_id)
       } else {
         knex.select('public_id').from('sensor').where('private_id', private_id).then((rows) => {
+          if (!rows.length) reject("no sensor found")
           let public_id = rows[0].public_id
           redis_client.setex(private_id, 3600, public_id);
           resolve(public_id)
@@ -198,13 +199,18 @@ function updateCrowdController(req, res) {
         return
   }
 
-  getPublicID(req.body.id)
-  .then((public_id) => insertDataIntoDB('sensor_data', {
-    'sensor_id': public_id,
+  let id, data = {
     'time': new Date(),
     'current_people': req.body.current,
     'new_people': req.body.new
-  })).then(() => { res.send({code: APIconstants.API_CODE_SUCCESS}) })
+  }
+
+  getPublicID(req.body.id)
+  .then((public_id) => {
+    id = public_id
+    insertDataIntoDB('sensor_data', {...data, sensor_id: id})
+  }).then(() => { publishSensorDataOnMqtt(id, data) })
+  .then(() => { res.send({code: APIconstants.API_CODE_SUCCESS}) })
   .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
 }
 
@@ -228,7 +234,6 @@ async function manageAdminRequests(req, res, callback) {
       if(!rows.length || new Date(rows[0].validity) < new Date()) { res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS }); return }
       callback(req, res)
     }).catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
-
   })
 }
 
