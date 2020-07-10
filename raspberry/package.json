@@ -1,0 +1,15 @@
+{
+  "name": "sensor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bluetooth.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@abandonware/noble": "^1.9.2-9",
+    "node-bluetooth": "^1.2.6"
+  }
+}
