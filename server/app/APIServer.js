@@ -186,6 +186,9 @@ function deleteNodeController(req, res) {
     return
   }
   deleteFromDB('sensor', {'private_id': req.body.id})
+  .then(() => getPublicID(req.body.id))
+  // need to remove before the publicID or it will be populate again after the getPublicID
+  .then((public_id) => deleteFromCache(public_id))
   .then(() => deleteFromCache(req.body.id))
   .then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
   .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
