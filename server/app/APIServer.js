@@ -1,9 +1,11 @@
 const redis = require('redis')
 
-const redis_port = process.env.REDIS_PORT || 6379;
-const redis_host = process.env.REDIS_HOST || 'localhost';
 
-const redis_client = redis.createClient(redis_port, redis_host);
+const redis_client = redis.createClient({
+  port      : process.env.REDIS_PORT || 6379,
+  host      : process.env.REDIS_HOST || 'localhost',
+  password  : process.env.REDIS_PASSWORD,
+});
 
 var APIconstants = require('./APIConstants').constants;
 
