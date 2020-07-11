@@ -6,10 +6,12 @@ mqttClient.connect();
 
 var topic_subscribed = new Set()
 
-const redis_port = process.env.REDIS_PORT || 6379;
-const redis_host = process.env.REDIS_HOST || 'localhost';
 
-const redis_client = redis.createClient(redis_port, redis_host);
+const redis_client = redis.createClient({
+  port      : process.env.REDIS_PORT || 6379,
+  host      : process.env.REDIS_HOST || 'localhost',
+  password  : process.env.REDIS_PASSWORD,
+});
 
 var APIconstants = require('./APIConstants').constants;
 
@@ -103,7 +105,7 @@ function getNodesInfo(public_id) {
 function publishSensorDataOnMqtt(public_id, data) {
   getNodesInfo(public_id)
   .then((sensor_info) => {
-    let data = {...data, name: sensor_info.name}
+    data = {...data, name: sensor_info.name}
     publishOnMqtt(sensor_info.building+"-"+sensor_info.floor, data)
     publishOnMqtt(sensor_info.building+"-"+sensor_info.roomtype, data)
   })
