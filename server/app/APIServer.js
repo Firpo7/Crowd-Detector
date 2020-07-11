@@ -151,7 +151,7 @@ function registerNewNodeController(req, res) {
     'floor' : req.body.floor,
     'roomtype' : req.body.type,
     'building' : req.body.building
-  }).then(() => { res.send({code: APIconstants.API_CODE_SUCCESS, id: public_id}) })
+  }).then(() => { res.send({code: APIconstants.API_CODE_SUCCESS, id: private_id}) })
   .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
 }
 
