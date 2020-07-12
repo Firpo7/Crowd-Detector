@@ -76,8 +76,8 @@ function getStatisticsFromDB(res, listOfIdSensors, operation, option_range) {
       operation_column = knex.ref(knex.raw('MAX(current_people)')).as('result')
       break;
     
-    case OPERATIONS.MAX_NUMBER_OF_PEOPLE:
-      operation_column = knex.ref(knex.raw('COUNT(new_people)')).as('result')
+    case OPERATIONS.NUMBER_OF_DISTICT_PEOPLE:
+      operation_column = knex.ref(knex.raw('SUM(new_people)')).as('result')
       break;
     
     default:
