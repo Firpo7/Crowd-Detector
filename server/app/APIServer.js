@@ -1,7 +1,8 @@
 const redis = require('redis')
 const mqttHandler = require('./MqttHandler')
 
-var mqttClient = new mqttHandler('ws://localhost:3000');
+const port = process.env.SERVER_PORT || 3000;
+var mqttClient = new mqttHandler(`ws://localhost:${port}`);
 mqttClient.connect();
 
 var topic_subscribed = new Set()
@@ -211,11 +212,10 @@ function updateCrowdController(req, res) {
   }
 
   getPublicID(req.body.id)
-  .then((public_id) => {
-    id = public_id
-    insertDataIntoDB('sensor_data', {...data, sensor_id: id})
-  }).then(() => { publishSensorDataOnMqtt(id, data) })
-  .then(() => { res.send({code: APIconstants.API_CODE_SUCCESS}) })
+  .then((public_id) => { id = public_id })
+  .then(() => insertDataIntoDB('sensor_data', {...data, sensor_id: id}))
+  .then(() => publishSensorDataOnMqtt(id, data))
+  .then(() => res.send({code: APIconstants.API_CODE_SUCCESS}) )
   .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
 }
 
