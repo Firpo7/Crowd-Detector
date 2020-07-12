@@ -105,14 +105,13 @@ function registerNewNodeController(req, res) {
 
 function registerNewBuildingController(req, res) {
   if( !( req.body.name && typeof(req.body.name)==='string' ) ||
-      !( req.body.address && typeof(req.body.address)==='string' ) ||
       !( req.body.numFloors && typeof(req.body.numFloors)==='string' )) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
   insertDataIntoDB('building', {
     'name' : req.body.name,
-    'address' : req.body.address,
+    ...(typeof(req.body.address)==='string' && {address : req.body.address}),
     'numfloors' : req.body.numFloors
   }).then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
   .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
