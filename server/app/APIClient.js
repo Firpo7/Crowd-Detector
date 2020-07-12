@@ -135,14 +135,14 @@ function getBuildingController(req, res) {
 }
 
 function getStatisticsController(req, res) {
-  if( !( req.query.operation && typeof(req.query.operation)==='string' ) ||
+  if( !( req.query.op && typeof(req.query.op)==='string' ) ||
       !( req.query.optionRange && typeof(req.query.optionRange)==='string' ) ||
       !( req.query.id && (typeof(req.query.id)==='string' || req.query.id instanceof Array) )) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
   let ids = getListOf(req.query.id)
-  getStatisticsFromDB(res, ids, req.query.operation.toLowerCase(), req.query.optionRange.toLowerCase())
+  getStatisticsFromDB(res, ids, req.query.op.toLowerCase(), req.query.optionRange.toLowerCase())
 }
 
 function getSimpleStatisticsController(req, res) {
