@@ -6,7 +6,7 @@ const APIconstants = require('./APIConstants').constants;
 
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}))
-const port = process.env.SERVER_PORT || 3000;
+const port = process.env.PORT || 3000;
 
 
 app.get(APIconstants.API_ENDPOINT_GETNODES, (req, res) => {
