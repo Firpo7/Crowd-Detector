@@ -1,5 +1,6 @@
 const redis = require('redis')
 
+
 const redis_client = redis.createClient({
   port      : process.env.REDIS_PORT || 6379,
   host      : process.env.REDIS_HOST || 'localhost',
@@ -14,10 +15,7 @@ var knex = require('knex')({
     host : process.env.DBHOST,
     user : process.env.DBUSER,
     password : process.env.DBPASSWORD,
-    database : process.env.DBNAME,
-    ssl: {
-      rejectUnauthorized: false,
-    }
+    database : process.env.DBNAME
   }
 });
 
