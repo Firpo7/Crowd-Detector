@@ -20,7 +20,10 @@ var knex = require('knex')({
     host : process.env.DBHOST,
     user : process.env.DBUSER,
     password : process.env.DBPASSWORD,
-    database : process.env.DBNAME
+    database : process.env.DBNAME,
+    ...( process.env.DBHOST !== 'localhost' && {ssl: {
+      rejectUnauthorized: false,
+    }})
   }
 });
 
