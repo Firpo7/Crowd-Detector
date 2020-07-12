@@ -4,17 +4,21 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --trace-warnings main.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aedes": "^0.42.2",
-    "dotenv": "^8.2.0",
+    "aedes": "^0.42.5",
     "express": "^4.17.1",
     "knex": "^0.21.1",
+    "mqtt": "^4.1.0",
     "pg": "^8.2.1",
     "redis": "^3.0.2"
+  },
+  "engines": {
+    "node": "14.3.0"
   }
 }
