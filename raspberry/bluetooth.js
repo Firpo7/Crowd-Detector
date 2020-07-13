@@ -1,7 +1,10 @@
 'use strict';
 
-const noble  = require('@abandonware/noble');
-const nodebt = require('node-bluetooth');
+//TODO: mappa per il giorno da svuotare ogni 24 ore e lista da pushare al device
+//TODO: fare richiesta push con i dati rilevati all'endpoint API con la request
+
+const noble   = require('@abandonware/noble');
+const nodebt  = require('node-bluetooth');
 
 //let nDevs = 0;
 const devices = new Map();
