@@ -6,13 +6,14 @@ body {
 
 .opaqueContainer {
 	background-color: rgba(255, 255, 255, 0.7);
-  	border: 2px solid black;
+  border: 2px solid black;
 	z-index: 2;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	width: fit-content;
-	margin: auto;
+  margin: auto;
+  margin-top: 1em;
 }
 
 .algerian {
@@ -22,7 +23,7 @@ body {
 }
 
 .imgtitle {	
-	height: 5em;
+	height: 7em;
 	padding: 2em;
 	content: url('./imgs/Unige.png');
 }
@@ -39,19 +40,19 @@ body {
   border: 3px solid #00B4CC;
   border-right: none;
   padding: 5px;
-  height: 20px;
+  height: 3em;
   border-radius: 5px 0 0 5px;
   outline: none;
   color: #9DBFAF;
 }
 
-.searchTerm:focus{
+.searchTerm:focus {
   color: #00B4CC;
 }
 
 .searchButton {
   width: 40px;
-  height: 36px;
+  height: 2em;
   border: 1px solid #00B4CC;
   background: #00B4CC;
   text-align: center;
@@ -67,4 +68,8 @@ body {
   margin-top: 3%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.card {
+  margin-left: 2em;
 }
