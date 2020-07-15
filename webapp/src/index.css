@@ -1,7 +1,8 @@
 body {
-	background-size: cover;
-	background-repeat: no-repeat;
-	background-image: url('./imgs/background.jpg');
+  background-position: center;  /* more responsive */
+	background-size: cover auto;
+  background-repeat: no-repeat;
+  background-image: url('./imgs/background.jpg');
 }
 
 .opaqueContainer {
@@ -71,5 +72,15 @@ body {
 }
 
 .card {
+  margin-top: 1.5em;
   margin-left: 2em;
+}
+
+.card .algerian {
+  color: yellow;
+  font-size: 2em;
+}
+
+.buildingsDiv {
+  margin-left: 8%;
 }
