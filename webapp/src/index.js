@@ -17,17 +17,11 @@ class Buildings extends React.Component {
 		this.state = {
 			buildings: [],
 		};
-
-		this.getBuildings();
 	}
-
-	getBuildings() {
-		fetch(PROXY + API + '/getBuildings')
-			.then(response => response.json())
-			.then(buildingObj => {
-				if (buildingObj.code === 42)
-					this.setState({ buildings: buildingObj.buildings })
-			});
+	 
+	componentDidUpdate(prevProps) {
+		if(prevProps.buildings !== this.props.buildings)
+			this.setState({buildings: this.props.buildings});
 	}
 
 	renderBuilding(building) {
@@ -53,30 +47,13 @@ class Buildings extends React.Component {
 }
 
 
-class SearchBar extends React.Component {
-	constructor(props) {
-		super(props);
-
-		this.state = {
-			valueToSearch: ''
-		};
-	}
-
-	handleChange() {
-		let userInput = document.getElementById('toSearch').value;
-		this.setState({ valueToSearch: userInput });
-	}
-
-	doSearch() {
-		console.log(this.state.valueToSearch);
-	}
-	
+class SearchBar extends React.Component {	
 	render() {
 		return (
 			<div className='wrap'>
 				<div className='search'>
-					<input type='text' id='toSearch' onChange={() => this.handleChange()} className='searchTerm' placeholder='Search for a building'/>
-					<button type='submit' onClick={() => this.doSearch()} className="searchButton">
+					<input type='text' id='toSearch' className='searchTerm' placeholder='Search for a building'/>
+					<button type='submit' onClick={() => this.props.onClick()} className="searchButton">
 						<i className='fa fa-search'/>
 					</button>
 				</div>
@@ -99,14 +76,52 @@ function TitleBar() {
 }
 
 
-function MainPage() {
-	return (
-		<>
-			<TitleBar />
-			<SearchBar />
-			<Buildings />
-		</>
-	);
+class MainPage extends React.Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			buildings: [],
+			buildingsToShow: []
+		}
+
+		this.updateBuildings = this.updateBuildings.bind(this);
+	}
+
+	componentDidMount() {
+		fetch(PROXY + API + '/getBuildings')
+			.then(response => response.json())
+			.then(buildingObj => {
+				if (buildingObj.code === 42)
+					this.setState({ 
+						buildings: buildingObj.buildings,
+						buildingsToShow: buildingObj.buildings,
+					});
+			});
+	}
+
+	updateBuildings() {
+		let userInput = document.getElementById('toSearch').value.toLowerCase();
+
+		if (userInput === '') {
+			this.setState({buildingsToShow: this.state.buildings});	
+			return;
+		}
+
+		let regex = new RegExp(userInput);
+		let filteredBuildings = this.state.buildings.filter(b => regex.test(b.name.toLowerCase()));
+		this.setState({buildingsToShow: filteredBuildings});
+	}
+
+	render() {
+		return (
+			<>
+				<TitleBar />
+				<SearchBar onClick={this.updateBuildings}/>
+				<Buildings buildings={this.state.buildingsToShow}/>
+			</>
+		);
+	}
 }
 
 
