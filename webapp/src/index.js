@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import Buildings from './buildings.js';
 
 import './index.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -10,7 +12,7 @@ const API   = 'http://iot-proj00.herokuapp.com/';
 
 
 // ================ COMPONENTS ================ \\
-class Buildings extends React.Component {
+class BuildingsView extends React.Component {
 	constructor(props) {
 		super(props);
 
@@ -19,8 +21,8 @@ class Buildings extends React.Component {
 		};
 	}
 	 
-	componentDidUpdate(prevProps) {
-		if(prevProps.buildings !== this.props.buildings)
+	componentDidUpdate() {
+		if(this.state.buildings !== this.props.buildings)
 			this.setState({buildings: this.props.buildings});
 	}
 
@@ -31,7 +33,10 @@ class Buildings extends React.Component {
 					<h5 className='card-title algerian'>{building.name}</h5>
 					<p className='text-white card-text'>Address: {building.address}</p>
 					<p className='text-white card-text'>Floors: {building.numfloors}</p>
-					<a href='http://localhost:3000' className='btn btn-outline-warning'>ENTER</a>
+					<Link to={{
+						pathname: '/building',
+						state: {building}
+					}} className='btn btn-outline-warning'>ENTER</Link>
 				</div>
 			</div>
 		);
@@ -46,20 +51,17 @@ class Buildings extends React.Component {
 	}
 }
 
-
-class SearchBar extends React.Component {	
-	render() {
-		return (
-			<div className='wrap'>
-				<div className='search'>
-					<input type='text' id='toSearch' className='searchTerm' placeholder='Search for a building'/>
-					<button type='submit' onClick={() => this.props.onClick()} className="searchButton">
-						<i className='fa fa-search'/>
-					</button>
-				</div>
+function SearchBar(props) {	
+	return (
+		<div className='wrap'>
+			<div className='search'>
+				<input type='text' id='toSearch' className='searchTerm' placeholder='Search for a building'/>
+				<button type='submit' onClick={() => props.onClick()} className="searchButton">
+					<i className='fa fa-search'/>
+				</button>
 			</div>
-		);
-	}
+		</div>
+	);
 }
 
 
@@ -85,7 +87,7 @@ class MainPage extends React.Component {
 			buildingsToShow: []
 		}
 
-		this.updateBuildings = this.updateBuildings.bind(this);
+		this.updateBuildings = this.updateBuildingsView.bind(this);
 	}
 
 	componentDidMount() {
@@ -100,7 +102,7 @@ class MainPage extends React.Component {
 			});
 	}
 
-	updateBuildings() {
+	updateBuildingsView() {
 		let userInput = document.getElementById('toSearch').value.toLowerCase();
 
 		if (userInput === '') {
@@ -117,8 +119,8 @@ class MainPage extends React.Component {
 		return (
 			<>
 				<TitleBar />
-				<SearchBar onClick={this.updateBuildings}/>
-				<Buildings buildings={this.state.buildingsToShow}/>
+				<SearchBar onClick={this.updateBuildingsView}/>
+				<BuildingsView buildings={this.state.buildingsToShow}/>
 			</>
 		);
 	}
@@ -126,6 +128,12 @@ class MainPage extends React.Component {
 
 
 ReactDOM.render(
-	<MainPage />,
+	<Router>
+		<Route path='/' exact={true} component={MainPage} />
+		<Route path='/building' exact={true} component={Buildings} />
+	</Router>,
+
 	document.getElementById('root')
 );
+
+export default TitleBar;

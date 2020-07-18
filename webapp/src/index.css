@@ -71,6 +71,8 @@ body {
   transform: translate(-50%, -50%);
 }
 
+/* ===== CARDS ===== */
+
 .card {
   margin-top: 1.5em;
   margin-left: 2em;
