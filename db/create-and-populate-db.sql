@@ -9,10 +9,11 @@ CREATE TABLE IF NOT EXISTS SENSOR(
 	private_id UUID UNIQUE NOT NULL,
 	name VARCHAR(50) NOT NULL,
 	floor integer NOT NULL,
-	maxPeople integer NOT NULL,
+	max_people integer NOT NULL,
 	roomType VARCHAR (50) NOT NULL,
 	building VARCHAR(50) NOT NULL,
-	FOREIGN KEY (building) REFERENCES BUILDING(name) on delete cascade
+	FOREIGN KEY (building) REFERENCES BUILDING(name) on delete cascade,
+	UNIQUE (building, floor, name)
 );
 
 CREATE TABLE IF NOT EXISTS SENSOR_DATA(
@@ -35,8 +36,8 @@ INSERT INTO TOKEN VALUES ('AAAAABBBBBCCCCCDDDDDEEEEE', to_timestamp(1891961465))
 INSERT INTO BUILDING (name, address, numFloors) VALUES ('DIBRIS-VP', 'via dodecaneso', 8);
 INSERT INTO BUILDING (name, address, numFloors) VALUES ('DIBRIS-OP', 'via all''Opera pia', 8);
 
-INSERT INTO SENSOR (public_id, private_id, name, floor, maxPeople, roomType, building) VALUES ('aedd5f53-d1c4-4faa-a4e5-09bebe9d6f8f', 'c406218e-12b7-40b6-9b46-9d733c636253', 'ufficio professor KJ', 2, 5, 'office', 'DIBRIS-VP');
-INSERT INTO SENSOR (public_id, private_id, name, floor, maxPeople, roomType, building) VALUES ('7181e041-2aa7-4472-a524-4e6a564a6dfc', '411a2f77-4954-40f0-9326-cf020015917e', 'aula-216', 2, 20, 'lecture room', 'DIBRIS-VP');
+INSERT INTO SENSOR (public_id, private_id, name, floor, max_people, roomType, building) VALUES ('aedd5f53-d1c4-4faa-a4e5-09bebe9d6f8f', 'c406218e-12b7-40b6-9b46-9d733c636253', 'ufficio professor KJ', 2, 5, 'office', 'DIBRIS-VP');
+INSERT INTO SENSOR (public_id, private_id, name, floor, max_people, roomType, building) VALUES ('7181e041-2aa7-4472-a524-4e6a564a6dfc', '411a2f77-4954-40f0-9326-cf020015917e', 'aula-216', 2, 20, 'lecture room', 'DIBRIS-VP');
 
 INSERT INTO SENSOR_DATA (time, current_people, new_people, sensor_id) VALUES (to_timestamp(1591961465), 2, 1, 'aedd5f53-d1c4-4faa-a4e5-09bebe9d6f8f');
 INSERT INTO SENSOR_DATA (time, current_people, new_people, sensor_id) VALUES (to_timestamp(1591961345), 1, 0, 'aedd5f53-d1c4-4faa-a4e5-09bebe9d6f8f');
