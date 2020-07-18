@@ -1,0 +1,30 @@
+body {
+	background-position: center;  /* more responsive */
+	background-size: cover auto;
+	background-repeat: no-repeat;
+	background-image: url('../imgs/background.jpg');
+  }
+
+.opaqueContainer {
+	background-color: rgba(255, 255, 255, 0.7);
+    border: 2px solid black;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: fit-content;
+    margin: auto;
+    margin-top: 1em;
+}
+
+.imgtitle {	
+	height: 7em;
+	padding: 2em;
+	content: url('../imgs/Unige.png');
+}
+
+.algerian {
+	color: #36f;
+	font-size: 3em;
+	text-shadow: 1px 1px 0 #FFFFFF, 2px 2px 0 #000000;
+}

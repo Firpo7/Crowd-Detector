@@ -1,14 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-import Buildings from './buildings.js';
+import TitleBar, {PROXY, API} from './common/common.js';
+import Building from './buildings.js';
 
-import './index.css'
+import './css/index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-
-const PROXY = 'https://cors-everywhere.herokuapp.com/';
-const API   = 'http://iot-proj00.herokuapp.com/';
 
 
 // ================ COMPONENTS ================ \\
@@ -64,20 +61,6 @@ function SearchBar(props) {
 	);
 }
 
-
-function TitleBar() {
-	return (
-		<div className='opaqueContainer'>
-			<div className='imgtitle'/>
-			<div className='textCenter'>
-				<h1 className='algerian'>UNIGE Crowd Detector</h1>
-			</div>
-			<div className='imgtitle'/>
-		</div>	
-	);
-}
-
-
 class MainPage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -86,8 +69,8 @@ class MainPage extends React.Component {
 			buildings: [],
 			buildingsToShow: []
 		}
-
-		this.updateBuildings = this.updateBuildingsView.bind(this);
+		
+		this.updateBuildingsView = this.updateBuildingsView.bind(this);
 	}
 
 	componentDidMount() {
@@ -130,7 +113,7 @@ class MainPage extends React.Component {
 ReactDOM.render(
 	<Router>
 		<Route path='/' exact={true} component={MainPage} />
-		<Route path='/building' exact={true} component={Buildings} />
+		<Route path='/building' exact={true} component={Building} />
 	</Router>,
 
 	document.getElementById('root')
