@@ -127,7 +127,13 @@ function getBuildingsFromDB(name) {
 
 function getSimpleStatisticsFromDB(listOfIdSensors=[]) {
   let toPromise = function( resolve, reject ) {
-    knex.select('sensor_id','current_people').from('sensor_data').whereIn('sensor_id', listOfIdSensors).orderBy('time','desc').limit(1).then((rows) => {
+    knex.select('sensor_data.sensor_id', "sensor_data.current_people")
+    .from('sensor_data').join(
+      knex.select('sensor_id', knex.ref(knex.raw('MAX(time)')).as('lasttime') ).from('sensor_data').groupBy('sensor_id').as('tmp'),
+      'sensor_data.sensor_id', '=', 'tmp.sensor_id'
+    )
+    .where(knex.raw('sensor_data.time=tmp.lasttime')).whereIn('sensor_data.sensor_id', listOfIdSensors)
+    .then((rows) => {
       resolve(rows)
     }).catch((err) => reject(err))
   }
