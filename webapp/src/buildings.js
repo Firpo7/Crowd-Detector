@@ -1,11 +1,76 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from "react-router-dom";
-import TitleBar, {PROXY, API} from './common/common.js';
+import TitleBar, { PROXY, API } from './common/common.js';
+import MultiSelect from "react-multi-select-component";
 
 import './css/buildings.css';
 
 
 const FIVE_MINUTES = 5 * 60 * 1000; //in milliseconds
+const ROOM_TYPES = [
+
+];
+
+function createSimpleObj(param) {
+	if (typeof(param) === 'Number')
+		return {label: param.toString, value: param};
+	
+	return {label: param, value: param};
+}
+
+
+function FloorDrowpdown(props) {
+	const floors = [];
+	for (let i = 1; i <= props.numfloors; i++)
+		floors.push(createSimpleObj(i));
+  
+	const [selected, setSelected] = useState([]);
+  
+	return (
+		<div className='dropdown'>
+			<MultiSelect
+				disableSearch
+				options={floors}
+				value={selected}
+				onChange={setSelected}
+				labelledBy={'Select floor'}
+				overrideStrings={{selectSomeItems: 'Select floor...'}}
+			/>
+		</div>
+	);
+};
+
+function TypeDrowpdown() {
+	const types = [
+		createSimpleObj('office'),
+		createSimpleObj('lecture room'),
+		createSimpleObj('common room'),
+		createSimpleObj('library'),
+		createSimpleObj('study room'),
+		createSimpleObj('secretariat office'),
+		createSimpleObj('reserved room')
+	];
+  
+	const [selected, setSelected] = useState([]);
+  
+	return (
+		<div className='dropdown'>
+			<MultiSelect
+				disableSearch
+				options={types}
+				value={selected}
+				onChange={setSelected}
+				labelledBy={'Select type'}
+				overrideStrings={{selectSomeItems: 'Type of room...'}}
+			/>
+		</div>
+	);
+};
+
+
+/*class SearchButton extends React.Component {
+
+}*/
 
 
 class SensorsView extends React.Component {
@@ -40,6 +105,7 @@ class SensorsView extends React.Component {
     				<p><b><i>At floor:</i></b> {sensor.floor}</p>
 					<p><b><i>Type:</i></b> {sensor.roomtype}</p>
 					<p><b><i>People allowed</i></b>: {sensor.max_people}</p>
+					{/* <p><b><i>People in room</i></b>: {sensor.curr_people}</p> */}
     				<Link to='#' className='btn button'>Show Statistics</Link>
   				</div>
 			</div>
@@ -63,7 +129,8 @@ class Building extends React.Component {
 
 		this.state = {
 			building: params.name,
-			max_people: params.numfloors,
+			max_people: params.max_people,
+			numfloors: params.numfloors,
 			sensors: [],
 			sensorsToShow: []
 		}
@@ -116,7 +183,11 @@ class Building extends React.Component {
 	render() {
 		return (
 			<>
-				<TitleBar />
+				<TitleBar />,
+				<div className='searchWrapper'>
+					<FloorDrowpdown numfloors={this.state.numfloors}/>
+					<TypeDrowpdown />
+				</div>
 				<SensorsView sensors={this.state.sensorsToShow}/>
 			</>
 		);

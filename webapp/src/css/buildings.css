@@ -50,6 +50,16 @@
 .product-details .button:hover, .product-details .button:active, .product-details .button:focus {
     color: #ff5;
 }
+
+.searchWrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.dropdown {
+    width: 30%;
+    padding: 1%;
+}
   
 @media (max-width: 700px) {
     .product-card {
