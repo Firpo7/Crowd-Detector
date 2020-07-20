@@ -1,77 +1,162 @@
 import React, { useState } from 'react';
 import { Link } from "react-router-dom";
 import TitleBar, { PROXY, API } from './common/common.js';
-import MultiSelect from "react-multi-select-component";
+import { Picky } from 'react-picky';
 
+import 'react-picky/dist/picky.css';
 import './css/buildings.css';
 
 
 const FIVE_MINUTES = 5 * 60 * 1000; //in milliseconds
-const ROOM_TYPES = [
-
-];
-
-function createSimpleObj(param) {
-	if (typeof(param) === 'Number')
-		return {label: param.toString, value: param};
-	
-	return {label: param, value: param};
-}
 
 
+// ========== COMPONENTS ========== \\
 function FloorDrowpdown(props) {
 	const floors = [];
 	for (let i = 1; i <= props.numfloors; i++)
-		floors.push(createSimpleObj(i));
+		floors.push(i);
   
 	const [selected, setSelected] = useState([]);
-  
+
 	return (
-		<div className='dropdown'>
-			<MultiSelect
-				disableSearch
-				options={floors}
+		<div className='dropdown'>			
+			<Picky
 				value={selected}
+				options={floors}
 				onChange={setSelected}
-				labelledBy={'Select floor'}
-				overrideStrings={{selectSomeItems: 'Select floor...'}}
+				open={false}
+				valueKey='id'
+				labelKey='name'
+				multiple
+				placeholder='Select floors...'
+				dropdownHeight={600}
+				numberDisplayed={1}
+				manySelectedPlaceholder={selected.length + ' selected...'}
+				render={({
+					style,
+					isSelected,
+					item,
+					selectValue
+				}) => {
+					return (
+						<li
+							style={style}
+							className={isSelected ? 'selected' : ''}
+							key={item}
+							onClick={() => {
+								selectValue(item);
+								props.changeFloor(
+									!isSelected ? 
+										selected.concat([item]) : 
+										selected.filter(x => x !== item)
+								)
+							}}
+						>
+							<input type='checkbox' checked={isSelected} readOnly />
+							<span>{item}</span>
+						</li>
+					);
+  				}}
 			/>
 		</div>
 	);
 };
 
-function TypeDrowpdown() {
-	const types = [
-		createSimpleObj('office'),
-		createSimpleObj('lecture room'),
-		createSimpleObj('common room'),
-		createSimpleObj('library'),
-		createSimpleObj('study room'),
-		createSimpleObj('secretariat office'),
-		createSimpleObj('reserved room')
+function TypeDrowpdown(props) {
+	const roomTypes = [
+		'office',
+		'lecture room',
+		'common room',
+		'library',
+		'study room',
+		'secretariat office',
+		'reserved room'
 	];
   
 	const [selected, setSelected] = useState([]);
-  
+
 	return (
-		<div className='dropdown'>
-			<MultiSelect
-				disableSearch
-				options={types}
+		<div className='dropdown'>			
+			<Picky
 				value={selected}
+				options={roomTypes}
 				onChange={setSelected}
-				labelledBy={'Select type'}
-				overrideStrings={{selectSomeItems: 'Type of room...'}}
+				open={false}
+				valueKey='id'
+				labelKey='name'
+				multiple
+				placeholder='Type of room...'
+				dropdownHeight={600}
+				numberDisplayed={1}
+				manySelectedPlaceholder={selected.length + ' selected...'}
+				render={({
+					style,
+					isSelected,
+					item,
+					selectValue
+				}) => {
+					return (
+						<li
+							style={style}
+							className={isSelected ? 'selected' : ''}
+							key={item}
+							onClick={() => {
+								selectValue(item);
+								props.changeType(
+									!isSelected ? 
+										selected.concat([item]) : 
+										selected.filter(x => x !== item)
+								)
+							}}
+						>
+							<input type='checkbox' checked={isSelected} readOnly />
+							<span>{item}</span>
+						</li>
+					);
+  				}}
 			/>
 		</div>
 	);
 };
 
+class Search extends React.Component {
+	constructor(props) {
+		super(props);
 
-/*class SearchButton extends React.Component {
+		this.state = {
+			roomTypes: [],
+			floors: [],
+			numfloors: props.numfloors
+		}
 
-}*/
+		this.changeType  = this.changeType.bind(this);
+		this.changeFloor = this.changeFloor.bind(this);
+	}
 
+	changeType(roomTypes) {
+		this.setState({roomTypes: roomTypes});
+		console.log(roomTypes);
+	}
+
+	changeFloor(floors) {
+		this.setState({floors: floors});
+		console.log('SELECTED FLOORS:', floors);
+	}
+
+	render() {
+		return (
+			<div className='searchWrapper'>
+				<FloorDrowpdown 
+					numfloors={this.state.numfloors} 
+					changeFloor={this.changeFloor}
+				/>
+				<TypeDrowpdown 
+					changeType={this.changeType}
+				/>
+			</div>
+		);
+	}
+}
 
 class SensorsView extends React.Component {
 	constructor(props) {
@@ -184,11 +269,8 @@ class Building extends React.Component {
 		return (
 			<>
 				<TitleBar />,
-				<div className='searchWrapper'>
-					<FloorDrowpdown numfloors={this.state.numfloors}/>
-					<TypeDrowpdown />
-				</div>
-				<SensorsView sensors={this.state.sensorsToShow}/>
+				<Search numfloors={this.state.numfloors} />
+				<SensorsView sensors={this.state.sensorsToShow} />
 			</>
 		);
 	}
