@@ -83,7 +83,7 @@ class Building extends React.Component {
 				let updatedSensors = [];
 
 				sensors.forEach(s => {
-					s.curr_people = peopleObj.datas[currentSensor].current_people;
+					s.curr_people = peopleObj.datas[currentSensor++].current_people;
 					updatedSensors.push(s);
 				});
 				
