@@ -9,7 +9,9 @@
 .product-card {
     background-color: #fdfefe;
     max-width: 23rem;
-    min-height: 10rem;
+    min-width: 23rem;
+    min-height: 19rem;
+    max-height: 19rem;
     margin: 0 auto;
     margin-top: 2em;
     margin-left: 3em;
@@ -17,7 +19,7 @@
     color: #919495;
     font-weight: normal;
     text-align: center;    
-    font-size: 12px;
+    font-size: 14px;
     display: inline-block;
 }
   
@@ -27,13 +29,14 @@
 }
 
 .product-details h1 {
-    color: #333;
+    /*color: #333;*/
     font-family: "Pacifico", cursive;
     /*font-size: 24px;*/
 }
 
 .product-details .button {
-    width: 6rem;
+    /*width: 6rem;*/
+    float: right;
     height: 3rem;
     margin-top: 20px;
     background-color: #337AB7;
@@ -41,6 +44,7 @@
     border: 1px #337AB7;
     color: #fff;
     box-shadow: 2px 2px 7px #173853;
+    font-size: 16px;
 }
 
 .product-details .button:hover, .product-details .button:active, .product-details .button:focus {
