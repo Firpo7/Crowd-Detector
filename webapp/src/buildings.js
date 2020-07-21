@@ -47,8 +47,8 @@ function FloorDrowpdown(props) {
 								selectValue(item);
 								props.changeFloor(
 									!isSelected ? 
-										selected.concat([item]) : 
-										selected.filter(x => x !== item)
+										selected.concat([item]) :
+										selected.splice(selected.indexOf(item), 1)
 								)
 							}}
 						>
@@ -69,7 +69,7 @@ function TypeDrowpdown(props) {
 		'common room',
 		'library',
 		'study room',
-		'secretariat office',
+		'laboratory',
 		'reserved room'
 	];
   
@@ -119,6 +119,17 @@ function TypeDrowpdown(props) {
 	);
 };
 
+function SearchButton(props) {
+	return (
+		<div className='dropdown divBtn'>
+			<button className='searchBtn' onClick={props.onClick}>
+				<b>SEARCH</b>
+				<i className="fa fa-search"/>
+			</button>
+		</div>
+	);
+}
+
 class Search extends React.Component {
 	constructor(props) {
 		super(props);
@@ -131,16 +142,19 @@ class Search extends React.Component {
 
 		this.changeType  = this.changeType.bind(this);
 		this.changeFloor = this.changeFloor.bind(this);
+		this.doSearch = this.doSearch.bind(this);
 	}
 
 	changeType(roomTypes) {
 		this.setState({roomTypes: roomTypes});
-		console.log(roomTypes);
 	}
 
 	changeFloor(floors) {
 		this.setState({floors: floors});
-		console.log('SELECTED FLOORS:', floors);
+	}
+
+	doSearch() {
+		this.props.onClick(this.state.roomTypes, this.state.floors);
 	}
 
 	render() {
@@ -152,6 +166,9 @@ class Search extends React.Component {
 				/>
 				<TypeDrowpdown 
 					changeType={this.changeType}
+				/>
+				<SearchButton 
+					onClick={this.doSearch}
 				/>
 			</div>
 		);
@@ -220,6 +237,8 @@ class Building extends React.Component {
 			sensorsToShow: []
 		}
 
+		this.updateSensorView = this.updateSensorView.bind(this);
+
 		//get the people count every 5 minutes to update the view
 		setInterval(() => this.fetchSensorsInBuildings(), FIVE_MINUTES);
 	}
@@ -265,11 +284,39 @@ class Building extends React.Component {
 		this.fetchSensorsInBuildings();
 	}
 
+	updateSensorView(types, floors) {
+		if (!types.length && !floors.length) {
+			this.setState({sensorsToShow: this.state.sensors});
+			return;
+		}
+
+		let sensors = this.state.sensors;
+		let filteredSensors = [];
+		
+		if (!types.length) //search by floor
+			filteredSensors = sensors.filter(
+				s => floors.includes(s.floor)
+			);	
+		else if (!floors.length) //search by type
+			filteredSensors = sensors.filter(
+				s => types.includes(s.roomtype)
+			);
+		else //search for both
+			filteredSensors = sensors.filter(
+				s => types.includes(s.roomtype) && floors.includes(s.floor)
+			);
+
+		this.setState({sensorsToShow: filteredSensors});
+	}
+
 	render() {
 		return (
 			<>
 				<TitleBar />,
-				<Search numfloors={this.state.numfloors} />
+				<Search 
+					numfloors={this.state.numfloors}
+					onClick={this.updateSensorView}
+				/>
 				<SensorsView sensors={this.state.sensorsToShow} />
 			</>
 		);

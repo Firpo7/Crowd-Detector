@@ -60,6 +60,33 @@
     width: 30%;
     padding: 1%;
 }
+
+.divBtn {
+    width: auto;
+}
+
+button {
+    outline: none !important;
+}
+
+button b {
+    margin-right: 10px;
+}
+
+.searchBtn {
+    margin-left: 0.5em;
+    height: 38px;
+    background-color: cornflowerblue;
+    color: aquamarine;
+    outline: none;
+    border: none;
+    border-radius: 15px;
+}
+
+.searchBtn:active {
+    background-color: #3e8e41;
+    transform: translateY(4px);
+}
   
 @media (max-width: 700px) {
     .product-card {
