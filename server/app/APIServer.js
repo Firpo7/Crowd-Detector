@@ -7,13 +7,26 @@ function registerNewNodeController(req, res) {
       !( req.body.max_people && typeof(req.body.max_people)==='string' ) ||
       !( req.body.type && typeof(req.body.type)==='string' ) ||
       !( req.body.floor && typeof(req.body.floor)==='string' ) ||
-      !( req.body.building && typeof(req.body.building)==='string' )) {
+      !( req.body.building && typeof(req.body.building)==='string' ) ||
+       ( parseInt(req.body.max_people) < 1 ) ) { //aggiungere il controllo sul tipo di stanza quando metteremo una lista comune ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
 
   let public_id = Utils.generateRandomID()
   let private_id = Utils.generateRandomID()
+
+   //check if a floor is valid for that building
+   knex.select('numfloors').from('building').where('name', req.body.building)
+   .then(rows => {
+     let maxFloor = rows[0].numfloors
+     let requestedFloor = parseInt(req.body.floor)
+     if( requestedFloor < 1 || requestedFloor > maxFloor )  
+       res.send({ code: APIconstants.API_CODE_INVALID_DATA })
+       return
+   })
+   .catch(err => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+
   Utils.insertDataIntoDB('sensor', {
     'public_id' : public_id,
     'private_id' : private_id,
@@ -28,7 +41,8 @@ function registerNewNodeController(req, res) {
 
 function registerNewBuildingController(req, res) {
   if( !( req.body.name && typeof(req.body.name)==='string' ) ||
-      !( req.body.numFloors && typeof(req.body.numFloors)==='string' )) {
+      !( req.body.numFloors && typeof(req.body.numFloors)==='string' ) ||
+       ( parseInt(req.body.numFloors) < 1 ) ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -69,7 +83,9 @@ function deleteNodeController(req, res) {
 function updateCrowdController(req, res) {
   if( !( req.body.id && typeof(req.body.id)==='string' ) ||
       !( req.body.current && typeof(req.body.current)==='string' ) ||
-      !( req.body.new && typeof(req.body.new)==='string' )) {
+      !( req.body.new && typeof(req.body.new)==='string' ) ||
+      ( parseInt(req.body.current) < 0 ) ||
+      ( parseInt(req.body.new) < 0) ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -86,7 +102,7 @@ function updateCrowdController(req, res) {
 
 function manageAdminRequests(req, res, callback) {
   let token = req.body.token
-  if(!token) { res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS }); return}
+  if(!token) { res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS }); return }
 
   Utils.checkValidityToken(token)
   .then(() => callback(req, res))
