@@ -3,7 +3,6 @@ import React from 'react';
 
 import '../css/common.css';
 
-export const PROXY = 'https://cors-everywhere.herokuapp.com/';
 export const API   = 'http://iot-proj00.herokuapp.com';
 
 function TitleBar() {

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-import TitleBar, {PROXY, API} from './common/common.js';
+import TitleBar, { API } from './common/common.js';
 import Building from './buildings.js';
 
 import './css/index.css';
@@ -74,7 +74,7 @@ class MainPage extends React.Component {
 	}
 
 	componentDidMount() {
-		fetch(PROXY + API + '/getBuildings')
+		fetch(API + '/getBuildings')
 			.then(response => response.json())
 			.then(buildingObj => {
 				if (buildingObj.code === 42)

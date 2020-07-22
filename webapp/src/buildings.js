@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from "react-router-dom";
-import TitleBar, { PROXY, API } from './common/common.js';
+import TitleBar, { API } from './common/common.js';
 import { Picky } from 'react-picky';
 
 import 'react-picky/dist/picky.css';
@@ -246,7 +246,7 @@ class Building extends React.Component {
 	fetchCurrentPeople(sensors, ids) {
 		const idsString = ids.map(id => 'id=' + id + '&').join('').slice(0, -1);
 
-		fetch(PROXY + API + '/getSimpleStatistics?' + idsString)
+		fetch(API + '/getSimpleStatistics?' + idsString)
 		.then(people => people.json())
 		.then(peopleObj => {
 			if (peopleObj.code === 42) {
@@ -267,7 +267,7 @@ class Building extends React.Component {
 	}
 
 	fetchSensorsInBuildings() {
-		fetch(PROXY + API + '/getNodes?building=' + this.state.building)
+		fetch(API + '/getNodes?building=' + this.state.building)
 			.then(response => response.json())
 			.then(sensorsObj => {
 				if (sensorsObj.code === 42) {
