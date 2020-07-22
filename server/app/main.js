@@ -26,7 +26,6 @@ app.get(APIconstants.API_ENDPOINT_GET_SIMPLE_STAT, (req, res) => {
 });
 
 
-
 app.post(APIconstants.API_ENDPOINT_REGISTER_NEW_NODE, (req, res) => {
   ServerAPI.manageAdminRequests(req, res, ServerAPI.registerNewNode)
 });
@@ -46,6 +45,7 @@ app.post(APIconstants.API_ENDPOINT_DELETE_NODE, (req, res) => {
 app.post(APIconstants.API_ENDPOINT_UPDATE_CROWD, (req, res) => {
   ServerAPI.updateCrowd(req, res)
 });
+
 
 app.listen(port, () => {
   console.log(`listening on port ${ port }`);
