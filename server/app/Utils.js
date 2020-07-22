@@ -15,7 +15,7 @@ var knex = require('knex')({
     user : process.env.DBUSER,
     password : process.env.DBPASSWORD,
     database : process.env.DBNAME,
-    ...( process.env.DBHOST !== 'localhost' && {ssl: {
+    ...( process.env.DBSSL && {ssl: {
       rejectUnauthorized: false,
     }})
   }
