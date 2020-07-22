@@ -201,6 +201,20 @@ function getStatisticsFromDB(listOfIdSensors, operation, option_range) {
   return new Promise(toPromise)
 }
 
+function checkFloorBuilding(building, floor) {
+  let toPromise = function( resolve, reject ) {
+    if (floor < 1) reject()
+    getBuildingsFromDB(building)
+    .then((rows) => {
+      if (!rows.length) reject()
+      if ( floor > rows[0].maxFloor) reject()
+      resolve()
+    })
+    .catch((err) => reject(err))
+  }
+  return new Promise(toPromise)
+}
+
 function checkValidityToken(token) {
   let toPromise = function( resolve, reject ) {
     redis_client.get(token, (err, validity) => {
@@ -241,3 +255,4 @@ exports.getBuildingsFromDB = getBuildingsFromDB;
 exports.getSimpleStatisticsFromDB = getSimpleStatisticsFromDB;
 exports.getStatisticsFromDB = getStatisticsFromDB;
 exports.checkValidityToken = checkValidityToken;
+exports.checkFloorBuilding = checkFloorBuilding;

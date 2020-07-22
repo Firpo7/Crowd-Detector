@@ -16,18 +16,8 @@ function registerNewNodeController(req, res) {
   let public_id = Utils.generateRandomID()
   let private_id = Utils.generateRandomID()
 
-   //check if a floor is valid for that building
-   knex.select('numfloors').from('building').where('name', req.body.building)
-   .then(rows => {
-     let maxFloor = rows[0].numfloors
-     let requestedFloor = parseInt(req.body.floor)
-     if( requestedFloor < 1 || requestedFloor > maxFloor )  
-       res.send({ code: APIconstants.API_CODE_INVALID_DATA })
-       return
-   })
-   .catch(err => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
-
-  Utils.insertDataIntoDB('sensor', {
+  Utils.checkFloorBuilding(req.body.building, req.body.floor)
+  .then(() => Utils.insertDataIntoDB('sensor', {
     'public_id' : public_id,
     'private_id' : private_id,
     'name' : req.body.name,
@@ -35,7 +25,7 @@ function registerNewNodeController(req, res) {
     'floor' : req.body.floor,
     'roomtype' : req.body.type,
     'building' : req.body.building
-  }).then(() => { res.send({code: APIconstants.API_CODE_SUCCESS, id: private_id}) })
+  })).then(() => { res.send({code: APIconstants.API_CODE_SUCCESS, id: private_id}) })
   .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
 }
 
