@@ -62,7 +62,7 @@ function insertDataIntoDB(table, data) {
   let toPromise = function(resolve, reject) {knex.insert(data).into(table).then(() => {
     resolve()
   }).catch((err) => {
-    reject(err)
+    reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err })
   })};
   return new Promise(toPromise)
 }
@@ -72,7 +72,7 @@ function deleteFromDB(table, where) {
     knex(table).where(where).del().then(() => {
       resolve()
     }).catch((err) => {
-      reject(err)
+      reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err })
     })
   }
   return new Promise(toPromise)
@@ -81,18 +81,18 @@ function deleteFromDB(table, where) {
 function getPublicID(private_id) {
   let toPromise = function(resolve, reject) {
     redis_client.get(private_id, (err, public_id) => {
-      if (err) { reject(err) }
+      if (err) { reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }) }
       
       //if no match found in redis
       if (public_id != null) {
         resolve(public_id)
       } else {
         knex.select('public_id').from('sensor').where('private_id', private_id).then((rows) => {
-          if (!rows.length) { reject("no sensor found") ; return }
+          if (!rows.length) { reject({code: APIconstants.API_CODE_INVALID_DATA, err:"no sensor found"}) ; return }
           let public_id = rows[0].public_id
           redis_client.setex(private_id, 3600, public_id);
           resolve(public_id)
-        }).catch((err) => { reject(err) })
+        }).catch((err) => { reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }) })
       }
     });
   }
@@ -109,7 +109,7 @@ function getNodesFromDB(building, ids=[], floors=[], types=[]) {
     if (types.length) query.whereIn('roomtype', types)
 
     query.then((rows) => resolve(rows) )
-    .catch((err) => reject(err))
+    .catch((err) => reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }))
   }
   return new Promise(toPromise)
 }
@@ -120,7 +120,7 @@ function getBuildingsFromDB(name) {
     if (name) query.where('name', name)
     
     query.then((rows) => resolve(rows))
-    .catch((err) => reject(err))
+    .catch((err) => reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }))
   }
   return new Promise(toPromise)
 }
@@ -135,7 +135,7 @@ function getSimpleStatisticsFromDB(listOfIdSensors=[]) {
     .where(knex.raw('sensor_data.time=tmp.lasttime')).whereIn('sensor_data.sensor_id', listOfIdSensors)
     .then((rows) => {
       resolve(rows)
-    }).catch((err) => reject(err))
+    }).catch((err) => reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }))
   }
   return new Promise(toPromise)
 }
@@ -160,7 +160,7 @@ function getStatisticsFromDB(listOfIdSensors, operation, option_range) {
         break;
       
       default:
-        reject({ code: APIconstants.API_CODE_INVALID_DATA });
+        reject({ code: APIconstants.API_CODE_INVALID_DATA, err: "invalid operation" });
         return;
     }
 
@@ -191,26 +191,24 @@ function getStatisticsFromDB(listOfIdSensors, operation, option_range) {
         break;
       
       default:
-        reject({ code: APIconstants.API_CODE_INVALID_DATA });
+        reject({ code: APIconstants.API_CODE_INVALID_DATA, err: "invalid option range" });
         return;
     }
 
     query.select(dayColumn, operation_column).groupBy('day').then((rows) => resolve(rows))
-    .catch((err) => reject(err))
+    .catch((err) => reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }))
   }
   return new Promise(toPromise)
 }
 
 function checkFloorBuilding(building, floor) {
   let toPromise = function( resolve, reject ) {
-    if (floor < 1) reject()
     getBuildingsFromDB(building)
     .then((rows) => {
-      if (!rows.length) reject()
-      if ( floor > rows[0].maxFloor) reject()
+      if (!rows.length || floor > rows[0].maxFloor) reject({ code: APIconstants.API_CODE_INVALID_DATA, err: `no data in DB: ${building}` })
       resolve()
     })
-    .catch((err) => reject(err))
+    .catch((err) => reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }))
   }
   return new Promise(toPromise)
 }
@@ -218,7 +216,7 @@ function checkFloorBuilding(building, floor) {
 function checkValidityToken(token) {
   let toPromise = function( resolve, reject ) {
     redis_client.get(token, (err, validity) => {
-      if (err) { reject(err) }
+      if (err) { reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }) }
         
       //if no match found in redis
       if (validity != null) {
@@ -237,7 +235,7 @@ function checkValidityToken(token) {
           }
         }
         reject({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS, err: `unauthorized access with token: ${token}` })
-      }).catch((err) => reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }))
+      }).catch((err) => reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }))
     })
   }
   return new Promise(toPromise)

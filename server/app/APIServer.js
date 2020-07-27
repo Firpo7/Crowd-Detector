@@ -8,7 +8,7 @@ function registerNewNodeController(req, res) {
       !( req.body.type && typeof(req.body.type)==='string' ) ||
       !( req.body.floor && typeof(req.body.floor)==='string' ) ||
       !( req.body.building && typeof(req.body.building)==='string' ) ||
-       ( parseInt(req.body.max_people) < 1 ) ) { //aggiungere il controllo sul tipo di stanza quando metteremo una lista comune ) {
+       ( parseInt(req.body.max_people) < 1 ) || parseInt(req.body.floor) < 0) { //aggiungere il controllo sul tipo di stanza quando metteremo una lista comune ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -26,7 +26,7 @@ function registerNewNodeController(req, res) {
     'roomtype' : req.body.type,
     'building' : req.body.building
   })).then(() => { res.send({code: APIconstants.API_CODE_SUCCESS, id: private_id}) })
-  .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
 }
 
 function registerNewBuildingController(req, res) {
@@ -41,7 +41,7 @@ function registerNewBuildingController(req, res) {
     ...(typeof(req.body.address)==='string' && {address : req.body.address}),
     'numfloors' : req.body.numFloors
   }).then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
-  .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
 }
 
 function deleteBuildingController(req, res) {
@@ -51,7 +51,7 @@ function deleteBuildingController(req, res) {
   }
   Utils.deleteFromDB('building', {'name': req.body.name})
   .then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
-  .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
 }
 
 function deleteNodeController(req, res) {
@@ -67,7 +67,7 @@ function deleteNodeController(req, res) {
   .then(() => Utils.deleteFromCache(public_id))
   .then(() => Utils.deleteFromCache(req.body.id))
   .then(() => res.send({code: APIconstants.API_CODE_SUCCESS}))
-  .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
 }
 
 function updateCrowdController(req, res) {
@@ -87,7 +87,7 @@ function updateCrowdController(req, res) {
     'current_people': req.body.current,
     'new_people': req.body.new
   })).then(() => res.send({code: APIconstants.API_CODE_SUCCESS}) )
-  .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
 }
 
 function manageAdminRequests(req, res, callback) {
@@ -96,7 +96,7 @@ function manageAdminRequests(req, res, callback) {
 
   Utils.checkValidityToken(token)
   .then(() => callback(req, res))
-  .catch((err) => { res.send({ code: err.code }); console.log(err.err) })
+  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
 }
 
 

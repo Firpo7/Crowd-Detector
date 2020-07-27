@@ -13,13 +13,13 @@ function getNodesController(req, res) {
 
   Utils.getNodesFromDB(building=req.query.building, floors=floors, types=types)
   .then((rows) => res.send({code: APIconstants.API_CODE_SUCCESS, listOfNodes: rows}))
-  .catch((err) => {res.send({code:APIconstants.API_CODE_GENERAL_ERROR}) ; console.log(err) })
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
 }
 
 function getBuildingController(req, res) {
   Utils.getBuildingsFromDB(req.query.name)
   .then((rows) => res.send({code: APIconstants.API_CODE_SUCCESS, buildings: rows}))
-  .catch((err) => {res.send({code:APIconstants.API_CODE_GENERAL_ERROR}) ; console.log(err) })
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
 }
 
 function getStatisticsController(req, res) {
@@ -43,7 +43,7 @@ function getSimpleStatisticsController(req, res) {
   let ids = Utils.getListOf(req.query.id)
   Utils.getSimpleStatisticsFromDB(ids)
   .then((rows) => res.send({code: APIconstants.API_CODE_SUCCESS, datas: rows}))
-  .catch((err) => {res.send({code:APIconstants.API_CODE_GENERAL_ERROR}) ; console.log(err) })
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
 }
 
 exports.getSimpleStatistics = getSimpleStatisticsController
