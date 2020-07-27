@@ -1,14 +1,15 @@
-const APIconstants = require('./APIConstants').constants;
+const APIconstants = require('./APIConstants').APIConstants;
+const ParamsCostants = require('./APIConstants').ParamsConstants;
 const Utils = require('./Utils');
 
 
 function registerNewNodeController(req, res) {
-  if( !( req.body.name && typeof(req.body.name)==='string' ) ||
-      !( req.body.max_people && typeof(req.body.max_people)==='string' ) ||
-      !( req.body.type && typeof(req.body.type)==='string' ) ||
-      !( req.body.floor && typeof(req.body.floor)==='string' ) ||
-      !( req.body.building && typeof(req.body.building)==='string' ) ||
-       ( parseInt(req.body.max_people) < 1 ) || parseInt(req.body.floor) < 0) { //aggiungere il controllo sul tipo di stanza quando metteremo una lista comune ) {
+  if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ||
+      !( Utils.checkParamString(req.body.max_people) && Utils.checkNumber(req.body.max_people) ) ||
+      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
+       ( parseInt(req.body.max_people) < 1 && parseInt(req.body.floor) < 0) ||
+      !( Utils.checkParamString(req.body.type) && Utils.checkRoomType(req.body.type) ) ||
+      !( Utils.checkParamString(req.body.building) && Utils.checkNameRegex(req.body.building, ParamsCostants.REGEX_PARAM_NAME) )) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -30,8 +31,8 @@ function registerNewNodeController(req, res) {
 }
 
 function registerNewBuildingController(req, res) {
-  if( !( req.body.name && typeof(req.body.name)==='string' ) ||
-      !( req.body.numFloors && typeof(req.body.numFloors)==='string' ) ||
+  if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ||
+      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
        ( parseInt(req.body.numFloors) < 1 ) ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
@@ -45,7 +46,7 @@ function registerNewBuildingController(req, res) {
 }
 
 function deleteBuildingController(req, res) {
-  if( !( req.body.name && typeof(req.body.name)==='string' ) ) {
+  if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ) {
     res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
     return
   }
@@ -55,7 +56,7 @@ function deleteBuildingController(req, res) {
 }
 
 function deleteNodeController(req, res) {
-  if( !( req.body.id && typeof(req.body.id)==='string' ) ) {
+  if( !( Utils.checkParamString(req.body.id) && Utils.checkGUID(req.body.id) ) ) {
     res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
     return
   }
@@ -71,9 +72,9 @@ function deleteNodeController(req, res) {
 }
 
 function updateCrowdController(req, res) {
-  if( !( req.body.id && typeof(req.body.id)==='string' ) ||
-      !( req.body.current && typeof(req.body.current)==='string' ) ||
-      !( req.body.new && typeof(req.body.new)==='string' ) ||
+  if( !( Utils.checkParamString(req.body.id) && Utils.checkGUID(req.body.id) ) ||
+      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
+      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
       ( parseInt(req.body.current) < 0 ) ||
       ( parseInt(req.body.new) < 0) ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })

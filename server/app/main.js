@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const ClientAPI = require('./APIClient')
 const ServerAPI = require('./APIServer')
-const APIconstants = require('./APIConstants').constants;
+const APIconstants = require('./APIConstants').APIConstants;
 
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}))

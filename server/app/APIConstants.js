@@ -1,4 +1,4 @@
-const obj = {
+const api = {
     // response codes
     API_CODE_SUCCESS: 42,
     API_CODE_GENERAL_ERROR: 442,
@@ -19,4 +19,12 @@ const obj = {
     API_ENDPOINT_DELETE_BUILDINGS: '/deleteBuilding'
 }
 
-exports.constants = Object.freeze(obj)
+const params = {
+    REGEX_PARAM_NAME: /^[a-z0-9\-_,]*$/i,
+    ROOMTYPES: new Set(['lecture room', 'library', 'office', 'common room', 'reserved room']),
+    OPERATION: new Set(['max', 'min', 'avg']),
+    OPTIONRANGE: new Set(['today','yesterday','lastweek','lastmonth']),
+}
+
+exports.APIConstants = Object.freeze(api)
+exports.ParamsConstants = Object.freeze(params)

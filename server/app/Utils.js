@@ -1,5 +1,6 @@
 const redis = require('redis');
-const APIconstants = require('./APIConstants').constants;
+const APIconstants = require('./APIConstants').APIConstants;
+const ParamsConstants = require('./APIConstants').ParamsConstants;
 
 
 const redis_client = redis.createClient({
@@ -46,6 +47,34 @@ function getListOf(value) {
   let ret = (value || [])
   if (!(ret instanceof Array)) ret = [value]
   return ret
+}
+
+function checkParamString(str) {
+  return typeof(str) === 'string'
+}
+
+function checkNameRegex(str, regex) {
+  return str.match(regex)
+}
+
+function checkRoomType(roomtype) {
+  return ParamsConstants.OPERATION.has(roomtype)
+}
+
+function checkNumber(num) {
+  return /^\d+$/.test(num);
+}
+
+function checkGUID(guid) {
+  return /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[0-9A-F]{4}-[0-9A-F]{12}$/i.test(guid)
+}
+
+function checkOperation(op) {
+  return ParamsConstants.OPERATION.has(op)
+}
+
+function checkOptionRange(op) {
+  return ParamsConstants.OPTIONRANGE.has(op)
 }
 
 
@@ -254,3 +283,10 @@ exports.getSimpleStatisticsFromDB = getSimpleStatisticsFromDB;
 exports.getStatisticsFromDB = getStatisticsFromDB;
 exports.checkValidityToken = checkValidityToken;
 exports.checkFloorBuilding = checkFloorBuilding;
+exports.checkParamString = checkParamString;
+exports.checkNameRegex = checkNameRegex;
+exports.checkRoomType = checkRoomType;
+exports.checkNumber = checkNumber;
+exports.checkGUID = checkGUID;
+exports.checkOperation = checkOperation;
+exports.checkOptionRange = checkOptionRange;

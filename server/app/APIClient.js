@@ -1,13 +1,13 @@
-const APIconstants = require('./APIConstants').constants;
+const APIconstants = require('./APIConstants').APIConstants;
+const ParamsConstants = require('./APIConstants').ParamsConstants;
 const Utils = require('./Utils');
 
 
-function checkIsPresent(value) {
-  return (value !== undefined && value !== null)
-}
-
 function getNodesController(req, res) {
-  if (!checkIsPresent(req.query.building)) { res.send({code: APIconstants.API_CODE_INVALID_DATA}); return; }
+  if (!Utils.checkParamString(req.query.building) || !Utils.checkNameRegex(req.query.building, ParamsConstants.REGEX_PARAM_NAME)) {
+    res.send({code: APIconstants.API_CODE_INVALID_DATA}); return;
+  }
+
   let floors = Utils.getListOf(req.query.floor)
   let types = Utils.getListOf(req.query.type)
 
@@ -17,15 +17,21 @@ function getNodesController(req, res) {
 }
 
 function getBuildingController(req, res) {
+  if (!Utils.checkParamString(req.query.name) || !Utils.checkNameRegex(req.query.name, ParamsConstants.REGEX_PARAM_NAME)) {
+    res.send({code: APIconstants.API_CODE_INVALID_DATA}); return;
+  }
+
   Utils.getBuildingsFromDB(req.query.name)
   .then((rows) => res.send({code: APIconstants.API_CODE_SUCCESS, buildings: rows}))
   .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
 }
 
 function getStatisticsController(req, res) {
-  if( !( req.query.op && typeof(req.query.op)==='string' ) ||
-      !( req.query.optionRange && typeof(req.query.optionRange)==='string' ) ||
-      !( req.query.id && (typeof(req.query.id)==='string' || req.query.id instanceof Array) )) {
+  if( !( Utils.checkParamString(req.query.op) && Utils.checkOperation(req.query.op) ) ||
+      !( Utils.checkParamString(req.query.optionRange) && Utils.checkOptionRange(req.query.optionRange) ) ||
+      !( (Utils.checkParamString(req.query.id) && Utils.checkGUID(req.query.id))  || 
+         (req.query.id instanceof Array && req.query.id.every(Utils.checkGUID)) )
+      ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -36,7 +42,8 @@ function getStatisticsController(req, res) {
 }
 
 function getSimpleStatisticsController(req, res) {
-  if ( !( req.query.id && (typeof(req.query.id)==='string' || req.query.id instanceof Array) )) {
+  if ( !( (Utils.checkParamString(req.query.id) && Utils.checkGUID(req.query.id))  || 
+     (req.query.id instanceof Array && req.query.id.every(Utils.checkGUID)) ) ) {
     res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
     return
   }
