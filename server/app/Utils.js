@@ -195,7 +195,7 @@ function getStatisticsFromDB(listOfIdSensors, operation, option_range) {
         return;
     }
 
-    query.select(dayColumn, operation_column).groupBy('day').then((rows) => resolve(rows))
+    query.select('sensor_id',dayColumn, operation_column).groupBy('day').groupBy('sensor_id').then((rows) => resolve(rows))
     .catch((err) => reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }))
   }
   return new Promise(toPromise)
