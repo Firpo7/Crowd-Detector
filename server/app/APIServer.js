@@ -8,10 +8,10 @@ function registerNewNodeController(req, res) {
   if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ||
       !( Utils.checkParamString(req.body.max_people) && Utils.checkNumber(req.body.max_people) ) ||
       !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
-       ( parseInt(req.body.max_people) < 1 || parseInt(req.body.floor) < 0) ||
+       ( parseInt(req.body.max_people) < 1 || parseInt(req.body.floor) < 0 ) ||
       !( Utils.checkParamString(req.body.type) && Utils.checkRoomType(req.body.type) ) ||
       !( Utils.checkParamString(req.body.building) && Utils.checkNameRegex(req.body.building, ParamsCostants.REGEX_PARAM_NAME) )) {
-        console.log("invalid data received")
+        console.log('invalid data received:', req.body.type)
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -24,7 +24,7 @@ function registerNewNodeController(req, res) {
     'public_id' : public_id,
     'private_id' : private_id,
     'name' : req.body.name,
-    'max_people' : req.body.max_people,
+    'maxpeople' : req.body.max_people,
     'floor' : req.body.floor,
     'roomtype' : req.body.type,
     'building' : req.body.building
@@ -84,7 +84,7 @@ function updateCrowdController(req, res) {
   }
 
   UtilsDB.getPublicID(req.body.id)
-  .then((public_id) => Utils.insertDataIntoDB('sensor_data', {
+  .then((public_id) => UtilsDB.insertDataIntoDB('sensor_data', {
     'sensor_id': public_id,
     'time': new Date(),
     'current_people': req.body.current,
