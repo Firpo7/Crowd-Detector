@@ -30,10 +30,15 @@ CREATE TABLE IF NOT EXISTS TOKEN(
 	validity TIMESTAMP NOT NULL
 );
 
+-- clean the tables
+DELETE FROM SENSOR_DATA;
+DELETE FROM SENSOR;
+DELETE FROM BUILDING;
+DELETE FROM TOKEN;
 
 INSERT INTO TOKEN VALUES ('AAAAABBBBBCCCCCDDDDDEEEEE', to_timestamp(1891961465));
 
-INSERT INTO BUILDING (name, address, numFloors) VALUES ('DIBRIS-VP', 'via dodecaneso', 8);
+/*INSERT INTO BUILDING (name, address, numFloors) VALUES ('DIBRIS-VP', 'via dodecaneso', 8);
 INSERT INTO BUILDING (name, address, numFloors) VALUES ('DIBRIS-OP', 'via all''Opera pia', 8);
 
 INSERT INTO SENSOR (public_id, private_id, name, floor, max_people, roomType, building) VALUES ('aedd5f53-d1c4-4faa-a4e5-09bebe9d6f8f', 'c406218e-12b7-40b6-9b46-9d733c636253', 'ufficio professor KJ', 2, 5, 'office', 'DIBRIS-VP');
@@ -66,4 +71,7 @@ select sensor_id as id, MAX(current_people) as results from SENSOR_DATA join SEN
 select * from SENSOR where building = 'DIBRIS-VP' and floor = 2;
 
 -- select all sensors given a building and a roomType
-select * from SENSOR where building = 'DIBRIS-VP' and roomType = 'office';
+select * from SENSOR where building = 'DIBRIS-VP' and roomType = 'office';*/
+
+-- select all tokens
+SELECT * FROM TOKEN;
