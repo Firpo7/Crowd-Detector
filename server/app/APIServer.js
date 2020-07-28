@@ -9,10 +9,10 @@ function registerNewNodeController(req, res) {
   if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ||
       !( Utils.checkParamString(req.body.max_people) && Utils.checkNumber(req.body.max_people) ) ||
       !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
-       ( parseInt(req.body.max_people) < 1 || parseInt(req.body.floor) < 0) ||
+       ( parseInt(req.body.max_people) < 1 || parseInt(req.body.floor) < 0 ) ||
       !( Utils.checkParamString(req.body.type) && Utils.checkRoomType(req.body.type) ) ||
       !( Utils.checkParamString(req.body.building) && Utils.checkNameRegex(req.body.building, ParamsCostants.REGEX_PARAM_NAME) )) {
-        console.log("invalid data received")
+        console.log('invalid data received:', req.body.type)
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -25,7 +25,7 @@ function registerNewNodeController(req, res) {
     'public_id' : public_id,
     'private_id' : private_id,
     'name' : req.body.name,
-    'max_people' : req.body.max_people,
+    'maxpeople' : req.body.max_people,
     'floor' : req.body.floor,
     'roomtype' : req.body.type,
     'building' : req.body.building
@@ -78,15 +78,17 @@ function updateCrowdController(req, res) {
   if( !( Utils.checkParamString(req.body.id) && Utils.checkGUID(req.body.id) ) ||
       !( Utils.checkParamString(req.body.current) && Utils.checkNumber(req.body.current) ) ||
       !( Utils.checkParamString(req.body.new) && Utils.checkNumber(req.body.new) ) ||
+      !( Utils.checkParamString(req.body.time) ) ||
       ( parseInt(req.body.current) < 0 ) ||
-      ( parseInt(req.body.new) < 0) ) {
+      ( parseInt(req.body.new) < 0 ) ||
+      ( parseInt(req.body.new) > parseInt(req.body.current) )) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
 
   let id;
   let data = {
-    'time': new Date(),
+    'time': req.body.time,
     'current_people': req.body.current,
     'new_people': req.body.new
   }
