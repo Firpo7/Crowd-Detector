@@ -58,7 +58,7 @@ function checkNameRegex(str, regex) {
 }
 
 function checkRoomType(roomtype) {
-  return ParamsConstants.OPERATION.has(roomtype)
+  return ParamsConstants.ROOMTYPES.has(roomtype)
 }
 
 function checkNumber(num) {
