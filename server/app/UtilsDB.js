@@ -1,5 +1,5 @@
 const redis = require('redis');
-const APIconstants = require('./APIConstants').APIConstants;
+const APIconstants = require('./Constants').APIConstants;
 
 
 const redis_client = redis.createClient({

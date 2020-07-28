@@ -1,5 +1,5 @@
-const APIconstants = require('./APIConstants').APIConstants;
-const ParamsCostants = require('./APIConstants').ParamsConstants;
+const APIconstants = require('./Constants').APIConstants;
+const ParamsCostants = require('./Constants').ParamsConstants;
 const Utils = require('./Utils');
 const UtilsDB = require('./UtilsDB');
 

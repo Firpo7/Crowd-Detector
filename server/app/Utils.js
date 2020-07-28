@@ -1,4 +1,4 @@
-const ParamsConstants = require('./APIConstants').ParamsConstants;
+const ParamsConstants = require('./Constants').ParamsConstants;
 
 
 function S4() {
