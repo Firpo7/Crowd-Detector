@@ -1,7 +1,7 @@
 'use strict';
 
 const fetch = require('node-fetch');
-const APIconstants = require('../server/app/APIConstants').constants;
+const APIconstants = require('../server/app/APIConstants').APIConstants;
 
 const API = 'http://localhost:3000';
 //const API = 'https://iot-proj00.herokuapp.com';
@@ -135,6 +135,6 @@ registerBuildings()
     .then(() => {
         console.log('Registering sensors...');
         registerSensorsAndGetPrivateIds()
-            .then(() => console.log(sensors_ids.length));
+            .then(() => console.log(sensors_ids));
     })
     .catch(err => console.log(err));
