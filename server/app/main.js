@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 const ws = require('websocket-stream');
 const ClientAPI = require('./APIClient')
 const ServerAPI = require('./APIServer')
-const APIconstants = require('./APIConstants').constants;
+const APIconstants = require('./Constants').APIConstants;
 
 const path = require("path");
 const aedes = require("aedes")();
@@ -15,6 +15,15 @@ ws.createServer({ server: httpServer }, aedes.handle);
 
 app.use(bodyParser.urlencoded({extended: true}))
 const port = process.env.SERVER_PORT || 3000;
+
+function endpointLogger() {
+  return (req,_,next) =>{
+    console.log('Endpoint:', req.url);
+    next();
+   }
+}
+
+app.use(endpointLogger());
 
 app.get(APIconstants.API_ENDPOINT_GETNODES, (req, res) => {
   ClientAPI.getNodes(req, res)
@@ -31,7 +40,6 @@ app.get(APIconstants.API_ENDPOINT_GET_STAT, (req, res) => {
 app.get(APIconstants.API_ENDPOINT_GET_SIMPLE_STAT, (req, res) => {
   ClientAPI.getSimpleStatistics(req, res)
 });
-
 
 
 app.post(APIconstants.API_ENDPOINT_REGISTER_NEW_NODE, (req, res) => {
