@@ -1,14 +1,15 @@
-const APIconstants = require('./APIConstants').constants;
+const APIconstants = require('./APIConstants').APIConstants;
+const ParamsCostants = require('./APIConstants').ParamsConstants;
 const Utils = require('./Utils');
 
 
 function registerNewNodeController(req, res) {
-  if( !( req.body.name && typeof(req.body.name)==='string' ) ||
-      !( req.body.max_people && typeof(req.body.max_people)==='string' ) ||
-      !( req.body.type && typeof(req.body.type)==='string' ) ||
-      !( req.body.floor && typeof(req.body.floor)==='string' ) ||
-      !( req.body.building && typeof(req.body.building)==='string' ) ||
-       ( parseInt(req.body.max_people) < 1 ) ) { //aggiungere il controllo sul tipo di stanza quando metteremo una lista comune ) {
+  if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ||
+      !( Utils.checkParamString(req.body.max_people) && Utils.checkNumber(req.body.max_people) ) ||
+      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
+       ( parseInt(req.body.max_people) < 1 && parseInt(req.body.floor) < 0) ||
+      !( Utils.checkParamString(req.body.type) && Utils.checkRoomType(req.body.type) ) ||
+      !( Utils.checkParamString(req.body.building) && Utils.checkNameRegex(req.body.building, ParamsCostants.REGEX_PARAM_NAME) )) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -26,12 +27,12 @@ function registerNewNodeController(req, res) {
     'roomtype' : req.body.type,
     'building' : req.body.building
   })).then(() => { res.send({code: APIconstants.API_CODE_SUCCESS, id: private_id}) })
-  .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
 }
 
 function registerNewBuildingController(req, res) {
-  if( !( req.body.name && typeof(req.body.name)==='string' ) ||
-      !( req.body.numFloors && typeof(req.body.numFloors)==='string' ) ||
+  if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ||
+      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
        ( parseInt(req.body.numFloors) < 1 ) ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
@@ -41,21 +42,21 @@ function registerNewBuildingController(req, res) {
     ...(typeof(req.body.address)==='string' && {address : req.body.address}),
     'numfloors' : req.body.numFloors
   }).then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
-  .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
 }
 
 function deleteBuildingController(req, res) {
-  if( !( req.body.name && typeof(req.body.name)==='string' ) ) {
+  if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ) {
     res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
     return
   }
   Utils.deleteFromDB('building', {'name': req.body.name})
   .then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
-  .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
 }
 
 function deleteNodeController(req, res) {
-  if( !( req.body.id && typeof(req.body.id)==='string' ) ) {
+  if( !( Utils.checkParamString(req.body.id) && Utils.checkGUID(req.body.id) ) ) {
     res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
     return
   }
@@ -67,13 +68,13 @@ function deleteNodeController(req, res) {
   .then(() => Utils.deleteFromCache(public_id))
   .then(() => Utils.deleteFromCache(req.body.id))
   .then(() => res.send({code: APIconstants.API_CODE_SUCCESS}))
-  .catch((err) => {res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err)})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
 }
 
 function updateCrowdController(req, res) {
-  if( !( req.body.id && typeof(req.body.id)==='string' ) ||
-      !( req.body.current && typeof(req.body.current)==='string' ) ||
-      !( req.body.new && typeof(req.body.new)==='string' ) ||
+  if( !( Utils.checkParamString(req.body.id) && Utils.checkGUID(req.body.id) ) ||
+      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
+      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
       ( parseInt(req.body.current) < 0 ) ||
       ( parseInt(req.body.new) < 0) ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
@@ -87,7 +88,7 @@ function updateCrowdController(req, res) {
     'current_people': req.body.current,
     'new_people': req.body.new
   })).then(() => res.send({code: APIconstants.API_CODE_SUCCESS}) )
-  .catch((err) => { res.send({ code: APIconstants.API_CODE_GENERAL_ERROR }); console.log(err) })
+  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
 }
 
 function manageAdminRequests(req, res, callback) {
@@ -96,7 +97,7 @@ function manageAdminRequests(req, res, callback) {
 
   Utils.checkValidityToken(token)
   .then(() => callback(req, res))
-  .catch((err) => { res.send({ code: err.code }); console.log(err.err) })
+  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
 }
 
 

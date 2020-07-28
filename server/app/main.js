@@ -2,12 +2,20 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const ClientAPI = require('./APIClient')
 const ServerAPI = require('./APIServer')
-const APIconstants = require('./APIConstants').constants;
+const APIconstants = require('./APIConstants').APIConstants;
 
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}))
 const port = process.env.SERVER_PORT || 3000;
 
+function endpointLogger() {
+  return (req,_,next) =>{
+    console.log('Endpoint:', req.url);
+    next();
+   }
+}
+
+app.use(endpointLogger());
 
 app.get(APIconstants.API_ENDPOINT_GETNODES, (req, res) => {
   ClientAPI.getNodes(req, res)
