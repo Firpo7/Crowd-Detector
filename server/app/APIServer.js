@@ -34,7 +34,7 @@ function registerNewNodeController(req, res) {
 
 function registerNewBuildingController(req, res) {
   if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ||
-      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
+      !( Utils.checkParamString(req.body.numFloors) && Utils.checkNumber(req.body.numFloors) ) ||
        ( parseInt(req.body.numFloors) < 1 ) ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
