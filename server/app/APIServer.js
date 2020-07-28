@@ -73,8 +73,8 @@ function deleteNodeController(req, res) {
 
 function updateCrowdController(req, res) {
   if( !( Utils.checkParamString(req.body.id) && Utils.checkGUID(req.body.id) ) ||
-      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
-      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
+      !( Utils.checkParamString(req.body.current) && Utils.checkNumber(req.body.current) ) ||
+      !( Utils.checkParamString(req.body.new) && Utils.checkNumber(req.body.new) ) ||
       ( parseInt(req.body.current) < 0 ) ||
       ( parseInt(req.body.new) < 0) ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
