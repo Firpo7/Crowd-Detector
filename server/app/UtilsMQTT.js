@@ -9,7 +9,7 @@ mqttClient.connect();
 var topic_subscribed = new Set();
 
 function subscribeToTopic(topic) {
-  if(!(topic in topic_subscribed)) {
+  if(!(topic_subscribed.has(topic))) {
     mqttClient.subscribe(topic)
     topic_subscribed.add(topic)
   }

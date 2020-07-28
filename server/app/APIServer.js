@@ -84,7 +84,7 @@ function updateCrowdController(req, res) {
         return
   }
 
-  let id = public_id;
+  let id;
   let data = {
     'time': new Date(),
     'current_people': req.body.current,
@@ -92,7 +92,7 @@ function updateCrowdController(req, res) {
   }
   UtilsDB.getPublicID(req.body.id)
   .then((public_id) => {id = public_id})
-  .then(() => Utils.insertDataIntoDB('sensor_data', {...data, sensor_id: id}))
+  .then(() => UtilsDB.insertDataIntoDB('sensor_data', {...data, sensor_id: id}))
   .then(() => UtilsMQTT.publishSensorDataOnMqtt(id,{...data, sensor_id: id}))
   .then(() => res.send({code: APIconstants.API_CODE_SUCCESS}) )
   .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
