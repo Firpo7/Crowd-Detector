@@ -22,7 +22,7 @@ function registerNewNodeController(req, res) {
     'public_id' : public_id,
     'private_id' : private_id,
     'name' : req.body.name,
-    'maxpeople' : req.body.max_people,
+    'max_people' : req.body.max_people,
     'floor' : req.body.floor,
     'roomtype' : req.body.type,
     'building' : req.body.building
