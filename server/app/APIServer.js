@@ -77,8 +77,10 @@ function updateCrowdController(req, res) {
   if( !( Utils.checkParamString(req.body.id) && Utils.checkGUID(req.body.id) ) ||
       !( Utils.checkParamString(req.body.current) && Utils.checkNumber(req.body.current) ) ||
       !( Utils.checkParamString(req.body.new) && Utils.checkNumber(req.body.new) ) ||
+      !( Utils.checkParamString(req.body.time) ) ||
       ( parseInt(req.body.current) < 0 ) ||
-      ( parseInt(req.body.new) < 0) ) {
+      ( parseInt(req.body.new) < 0 ) ||
+      ( parseInt(req.body.new) > parseInt(req.body.current) )) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -86,7 +88,7 @@ function updateCrowdController(req, res) {
   UtilsDB.getPublicID(req.body.id)
   .then((public_id) => UtilsDB.insertDataIntoDB('sensor_data', {
     'sensor_id': public_id,
-    'time': new Date(),
+    'time': req.body.time,
     'current_people': req.body.current,
     'new_people': req.body.new
   })).then(() => res.send({code: APIconstants.API_CODE_SUCCESS}) )
