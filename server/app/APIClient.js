@@ -17,7 +17,8 @@ function getNodesController(req, res) {
 }
 
 function getBuildingController(req, res) {
-  if (!Utils.checkParamString(req.query.name) || !Utils.checkNameRegex(req.query.name, ParamsConstants.REGEX_PARAM_NAME)) {
+  // if name it's present, then it should match the REGEX
+  if (Utils.checkParamString(req.query.name) && !Utils.checkNameRegex(req.query.name, ParamsConstants.REGEX_PARAM_NAME)) {
     res.send({code: APIconstants.API_CODE_INVALID_DATA}); return;
   }
 
