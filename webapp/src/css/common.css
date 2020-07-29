@@ -1,7 +1,7 @@
 body {
 	background-position: center;  /* more responsive */
 	background-size: cover auto;
-	background-repeat: no-repeat;
+	background-repeat: circle;
 	background-image: url('../imgs/background.jpg');
   }
 
