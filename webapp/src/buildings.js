@@ -190,6 +190,14 @@ class SensorsView extends React.Component {
 	}
 
 	renderSensor(sensor) {
+		if (sensor.name === 'Little kitchen') {
+			console.log('CURR:', sensor.curr_people);
+			console.log('MAX:', sensor.maxpeople);
+			console.log('YELLOW:', parseInt(sensor.maxpeople*0.5));
+			console.log('RED:', parseInt(sensor.maxpeople*0.8));
+		}
+		
+
 		return (
 			<div key={sensor.id} className="product-card" style={
 				/* 
@@ -198,15 +206,15 @@ class SensorsView extends React.Component {
 						YELLOW -> more than 60% full
 						GREEN  -> otherwise
 				*/
-				sensor.curr_people >= parseInt(sensor.max_people*0.8) ? {'backgroundColor': '#ff6961', 'color': '#963d35'}   :
-				sensor.curr_people >= parseInt(sensor.max_people*0.5) ? {'backgroundColor': '#ffee75', 'color': '#7c5407'} :
+				sensor.curr_people >= parseInt(sensor.maxpeople*0.8) ? {'backgroundColor': '#ff6961', 'color': '#963d35'} :
+				sensor.curr_people >= parseInt(sensor.maxpeople*0.5) ? {'backgroundColor': '#ffee75', 'color': '#7c5407'} :
 				{'backgroundColor': 'lightgreen', 'color': '#435e55'}
 			}>
   				<div className="product-details">
     				<h1>{sensor.name}</h1>
     				<p><b><i>At floor:</i></b> {sensor.floor}</p>
 					<p><b><i>Type:</i></b> {sensor.roomtype}</p>
-					<p><b><i>People allowed</i></b>: {sensor.max_people}</p>
+					<p><b><i>People allowed</i></b>: {sensor.maxpeople}</p>
 					{/* <p><b><i>People in room</i></b>: {sensor.curr_people}</p> */}
     				<Link to='#' className='btn button'>Show Statistics</Link>
   				</div>
@@ -231,7 +239,7 @@ class Building extends React.Component {
 
 		this.state = {
 			building: params.name,
-			max_people: params.max_people,
+			maxpeople: params.maxpeople,
 			numfloors: params.numfloors,
 			sensors: [],
 			sensorsToShow: []
@@ -250,11 +258,16 @@ class Building extends React.Component {
 		.then(people => people.json())
 		.then(peopleObj => {
 			if (peopleObj.code === 42) {
-				let currentSensor = 0;
 				let updatedSensors = [];
+				let peopleValuesMap = {};
+
+				peopleObj.datas.forEach(val => {
+					peopleValuesMap[val.sensor_id] = val.current_people;
+				});
 
 				sensors.forEach(s => {
-					s.curr_people = peopleObj.datas[currentSensor++].current_people;
+					let id = s.id;
+					s.curr_people = peopleValuesMap.hasOwnProperty(id) ? peopleValuesMap[id] : 0;
 					updatedSensors.push(s);
 				});
 				
