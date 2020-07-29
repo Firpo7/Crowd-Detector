@@ -88,7 +88,7 @@ function getPublicID(private_id) {
 
 function getNodesFromDB(building, ids=[], floors=[], types=[]) {
   let toPromise = function( resolve, reject ) {
-    let query = knex.select([knex.ref('public_id').as('id'), 'name', 'floor', 'roomtype', 'max_people']).from('sensor')
+    let query = knex.select([knex.ref('public_id').as('id'), 'name', 'floor', 'roomtype', 'maxpeople']).from('sensor')
     if (building) query.where('building', building)
     if (ids.length) query.whereIn('public_id', ids)
     if (floors.length) query.whereIn('floor', floors)
