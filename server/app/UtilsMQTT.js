@@ -2,7 +2,7 @@ const UtilsDB = require('./UtilsDB')
 const mqttHandler = require('./MqttHandler')
 
 
-const port = process.env.SERVER_PORT || 3000;
+const port = process.env.PORT || 3000;
 var mqttClient = new mqttHandler(`ws://localhost:${port}`);
 mqttClient.connect();
 
