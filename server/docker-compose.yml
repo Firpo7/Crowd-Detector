@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - 3000:3000
     network_mode: "host"
     volumes:
       - ./app/:/usr/src/app
@@ -15,4 +13,7 @@ services:
       DBPASSWORD: ${DBPASSWORD}
       DBNAME: ${DBNAME}
       DBHOST: ${DBHOST}
-      SERVER_PORT: 3000
+      SERVER_PORT: ${SERVER_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
