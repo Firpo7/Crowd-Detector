@@ -48,7 +48,7 @@ function FloorDrowpdown(props) {
 								props.changeFloor(
 									!isSelected ? 
 										selected.concat([item]) :
-										selected.splice(selected.indexOf(item), 1)
+										selected.filter(x => x !== item)
 								)
 							}}
 						>
@@ -190,14 +190,6 @@ class SensorsView extends React.Component {
 	}
 
 	renderSensor(sensor) {
-		if (sensor.name === 'Little kitchen') {
-			console.log('CURR:', sensor.curr_people);
-			console.log('MAX:', sensor.maxpeople);
-			console.log('YELLOW:', parseInt(sensor.maxpeople*0.5));
-			console.log('RED:', parseInt(sensor.maxpeople*0.8));
-		}
-		
-
 		return (
 			<div key={sensor.id} className="product-card" style={
 				/* 
