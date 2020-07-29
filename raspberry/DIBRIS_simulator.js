@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 const APIconstants = require('../server/app/Constants').APIConstants;
 const ROOMTYPES = Array.from(require('../server/app/Constants').ParamsConstants.ROOMTYPES.keys());
 
-const API = 'http://localhost:3000';
+const API = 'http://localhost:4000';
 //const API = 'https://iot-proj00.herokuapp.com';
 const DIBRIS = 'DIBRIS-VP';
 const TOKEN = 'AAAAABBBBBCCCCCDDDDDEEEEE';
@@ -175,10 +175,10 @@ function fillWithSimulatedData() {
 
     let currPeople = Array(2);
     let newPeople = Array(2);
-    let adjust = Array(2);
+    let adjust = Array(2);  //to simulate a more realistic flow of people
 
     const yy = 2020;
-    const MM = 7;
+    const MM = 7;   //july
     for (let dd=1; dd<=31; dd++) {
         currPeople[0] = getRandomInt(MAX_PEOPLE_PER_ROOM[SW1]);
         currPeople[1] = getRandomInt(MAX_PEOPLE_PER_ROOM[LC]);
@@ -220,7 +220,7 @@ registerBuildings()
         console.log('Registering sensors...');
         registerSensorsAndGetPrivateIds()
             .then(() => {
-                console.log('Filling tables with simulated data...');
+                console.log('Filling tables with sample data...');
                 fillWithSimulatedData();
             })
     })
