@@ -25,6 +25,7 @@ const OPERATIONS = {
   MAX_NUMBER_OF_PEOPLE: "max",
   AVG_NUMBER_OF_PEOPLE: "avg",
   NUMBER_OF_DISTICT_PEOPLE: "distinct",
+  ALL_STATISTICS: "all"
 }
 
 const OPTION_RANGE = {
@@ -126,23 +127,27 @@ function getSimpleStatisticsFromDB(listOfIdSensors=[]) {
   return new Promise(toPromise)
 }
 
-function getStatisticsFromDB(listOfIdSensors, operation, option_range) {
+function getStatisticsFromDB(sensor_id, operation, option_range) {
   let toPromise = function( resolve, reject ) {
-    let dayColumn = knex.ref(knex.raw('concat( EXTRACT(MONTH FROM time), \'-\', EXTRACT(DAY FROM time))')).as('day')
-    let query = knex('sensor_data').whereIn('sensor_id', listOfIdSensors)
+    let dayColumn = knex.raw('concat( EXTRACT(MONTH FROM time), \'-\', EXTRACT(DAY FROM time))')
+    let query = knex('sensor_data').where('sensor_id', sensor_id)
     let operation_column
 
     switch (operation) {
       case OPERATIONS.AVG_NUMBER_OF_PEOPLE:
-        operation_column = knex.ref(knex.raw('AVG(current_people)')).as('result')
+        operation_column = knex.raw('AVG(current_people)')
         break;
       
       case OPERATIONS.MAX_NUMBER_OF_PEOPLE:
-        operation_column = knex.ref(knex.raw('MAX(current_people)')).as('result')
+        operation_column = knex.raw('MAX(current_people)')
         break;
       
       case OPERATIONS.NUMBER_OF_DISTICT_PEOPLE:
-        operation_column = knex.ref(knex.raw('SUM(new_people)')).as('result')
+        operation_column = knex.raw('SUM(new_people)')
+        break;
+
+      case OPERATIONS.ALL_STATISTICS:
+        operation_column = 'current_people'
         break;
       
       default:
@@ -181,7 +186,13 @@ function getStatisticsFromDB(listOfIdSensors, operation, option_range) {
         return;
     }
 
-    query.select('sensor_id',dayColumn, operation_column).groupBy('day').groupBy('sensor_id').then((rows) => resolve(rows))
+    query.select({
+      ...( operation !== OPERATIONS.ALL_STATISTICS && {'day': dayColumn}),
+      ...( operation === OPERATIONS.ALL_STATISTICS && {'time': 'time'}),
+      'result': operation_column}
+      )
+    if ( operation !== OPERATIONS.ALL_STATISTICS) query.groupBy('day')
+    query.then((rows) => resolve(rows))
     .catch((err) => reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }))
   }
   return new Promise(toPromise)

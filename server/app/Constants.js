@@ -22,7 +22,7 @@ const api = {
 const params = {
     REGEX_PARAM_NAME: /^[A-Za-z][A-Za-z0-9\-_, ]+$/i,
     ROOMTYPES: new Set(['lecture room', 'library', 'office', 'common room', 'reserved room', 'study room', 'laboratory']),
-    OPERATION: new Set(['max', 'min', 'avg']),
+    OPERATION: new Set(['max', 'distinct', 'avg', 'all']),
     OPTIONRANGE: new Set(['today','yesterday','lastweek','lastmonth']),
 }
 
