@@ -22,8 +22,18 @@ const api = {
 const params = {
     REGEX_PARAM_NAME: /^[A-Za-z][A-Za-z0-9\-_, ]+$/i,
     ROOMTYPES: new Set(['lecture room', 'library', 'office', 'common room', 'reserved room', 'study room', 'laboratory']),
-    OPERATION: new Set(['max', 'distinct', 'avg', 'all']),
-    OPTIONRANGE: new Set(['today','yesterday','lastweek','lastmonth']),
+    OPERATIONS: {
+        MAX_NUMBER_OF_PEOPLE: "max",
+        AVG_NUMBER_OF_PEOPLE: "avg",
+        NUMBER_OF_DISTICT_PEOPLE: "distinct",
+        ALL_STATISTICS: "all"
+      },
+    OPTION_RANGES: {
+        TODAY: "today",
+        YESTERDAY: "yesterday",
+        LAST_WEEK: "lastweek",
+        LAST_MONTH: "lastmonth"
+      },
 }
 
 exports.APIConstants = Object.freeze(api)

@@ -1,5 +1,6 @@
 const redis = require('redis');
 const APIconstants = require('./Constants').APIConstants;
+const ParamConstants = require('./Constants').ParamsConstants
 
 
 const redis_client = redis.createClient({
@@ -20,20 +21,6 @@ var knex = require('knex')({
     }})
   }
 });
-
-const OPERATIONS = {
-  MAX_NUMBER_OF_PEOPLE: "max",
-  AVG_NUMBER_OF_PEOPLE: "avg",
-  NUMBER_OF_DISTICT_PEOPLE: "distinct",
-  ALL_STATISTICS: "all"
-}
-
-const OPTION_RANGE = {
-  TODAY: "today",
-  YESTERDAY: "yesterday",
-  LAST_WEEK: "lastweek",
-  LAST_MONTH: "lastmonth"
-}
 
 
 function deleteFromCache(key) {
@@ -134,19 +121,19 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
     let operation_column
 
     switch (operation) {
-      case OPERATIONS.AVG_NUMBER_OF_PEOPLE:
+      case ParamConstants.OPERATIONS.AVG_NUMBER_OF_PEOPLE:
         operation_column = knex.raw('AVG(current_people)')
         break;
       
-      case OPERATIONS.MAX_NUMBER_OF_PEOPLE:
+      case ParamConstants.OPERATIONS.MAX_NUMBER_OF_PEOPLE:
         operation_column = knex.raw('MAX(current_people)')
         break;
       
-      case OPERATIONS.NUMBER_OF_DISTICT_PEOPLE:
+      case ParamConstants.OPERATIONS.NUMBER_OF_DISTICT_PEOPLE:
         operation_column = knex.raw('SUM(new_people)')
         break;
 
-      case OPERATIONS.ALL_STATISTICS:
+      case ParamConstants.OPERATIONS.ALL_STATISTICS:
         operation_column = 'current_people'
         break;
       
@@ -159,23 +146,23 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
     let today_date = new Date(Date.UTC(current_date.getUTCFullYear(), current_date.getUTCMonth(), current_date.getUTCDate()));
 
     switch (option_range) {
-      case OPTION_RANGE.TODAY:
+      case ParamConstants.OPTION_RANGES.TODAY:
         query.where('time', '>', today_date)
         break;
       
-      case OPTION_RANGE.YESTERDAY:
+      case ParamConstants.OPTION_RANGES.YESTERDAY:
         let yesterday_date = new Date(today_date.getTime())
         yesterday_date.setDate(yesterday_date.getDate() - 1)
         query.whereBetween('time', [yesterday_date, today_date])
         break;
       
-      case OPTION_RANGE.LAST_WEEK:
+      case ParamConstants.OPTION_RANGES.LAST_WEEK:
         let lastweek_date = new Date(today_date.getTime())
         lastweek_date.setDate(lastweek_date.getDate() - 7)
         query.whereBetween('time', [lastweek_date, today_date])
         break;
       
-      case OPTION_RANGE.LAST_MONTH:
+      case ParamConstants.OPTION_RANGES.LAST_MONTH:
         let lastmonth_date = new Date(today_date.getTime())
         lastmonth_date.setDate(lastmonth_date.getDate() - 30)
         query.whereBetween('time', [lastmonth_date, today_date])
@@ -187,11 +174,11 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
     }
 
     query.select({
-      ...( operation !== OPERATIONS.ALL_STATISTICS && {'day': dayColumn}),
-      ...( operation === OPERATIONS.ALL_STATISTICS && {'time': 'time'}),
+      ...( operation !== ParamConstants.OPERATIONS.ALL_STATISTICS && {'day': dayColumn}),
+      ...( operation === ParamConstants.OPERATIONS.ALL_STATISTICS && {'time': 'time'}),
       'result': operation_column}
       )
-    if ( operation !== OPERATIONS.ALL_STATISTICS) query.groupBy('day')
+    if ( operation !== ParamConstants.OPERATIONS.ALL_STATISTICS) query.groupBy('day')
     query.then((rows) => resolve(rows))
     .catch((err) => reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }))
   }
