@@ -139,7 +139,7 @@ function getSimpleStatisticsFromDB(listOfIdSensors=[]) {
 
 function getStatisticsFromDB(sensor_id, operation, option_range) {
   let toPromise = function( resolve, reject ) {
-    let dayColumn = knex.raw('concat( EXTRACT(MONTH FROM time), \'-\', EXTRACT(DAY FROM time))')
+    let dayColumn = knex.raw("date_trunc('day', time)")
     let query = knex('sensor_data').where('sensor_id', sensor_id)
     let operation_column
 
@@ -197,11 +197,11 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
     }
 
     query.select({
-      ...( operation !== ParamConstants.OPERATIONS.ALL_STATISTICS && {'day': dayColumn}),
-      ...( operation === ParamConstants.OPERATIONS.ALL_STATISTICS && {'time': 'time'}),
+      ...( operation !== ParamConstants.OPERATIONS.ALL_STATISTICS && {'t': dayColumn}),
+      ...( operation === ParamConstants.OPERATIONS.ALL_STATISTICS && {'t': 'time'}),
       'result': operation_column}
       )
-    if ( operation !== ParamConstants.OPERATIONS.ALL_STATISTICS) query.groupBy('day')
+    if ( operation !== ParamConstants.OPERATIONS.ALL_STATISTICS) query.groupBy('t')
     query.then((rows) => resolve(rows))
     .catch((err) => reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }))
   }
