@@ -13,6 +13,7 @@ services:
       DBPASSWORD: ${DBPASSWORD}
       DBNAME: ${DBNAME}
       DBHOST: ${DBHOST}
+      DBSSL: ${DBSSL}
       PORT: ${PORT}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
