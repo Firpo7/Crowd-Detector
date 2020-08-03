@@ -6,20 +6,28 @@ import './css/stats.css';
 function RoomData(props) {
     return (
         <div className='roomDataWrapper'>
-            <div>
-                <span>FLOOR:</span>
-                <span>{props.room.floor}</span>
+            <div className='singleData'>
+                <div className='dataTitle'>FLOOR</div>
+                <div className='dataValue'>{props.room.floor}</div>
             </div>
-            <div>
-                <span>CAPACITY:</span>
-                <span>{props.room.maxpeople}</span>
+            <div className='singleData'>
+                <div className='dataTitle'>OCCUPANCY</div>
+                <div className='dataValue'>{props.room.maxpeople} ppl.</div>
             </div>
-            <div>
-                <span>TYPE:</span>
-                <span>{props.room.roomtype}</span>
+            <div className='singleData'>
+                <div className='dataTitle'>TYPE</div>
+                <div className='dataValue'>{props.room.roomtype}</div>
             </div>
         </div>
     );
+}
+
+class StatsChart extends React.Component {
+    render() {
+        return (
+            <div className='test' />
+        );
+    }
 }
 
 class Stats extends React.Component {
@@ -38,7 +46,10 @@ class Stats extends React.Component {
         return (
             <>
                 <TitleBar text={this.state.sensor.name}/>
-                <RoomData room={this.state.sensor}/>
+                <div style={{'display': 'flex', 'flexDirection': 'row'}}>
+                    <RoomData room={this.state.sensor}/>
+                    <StatsChart />
+                </div>
             </>
         );
     }
