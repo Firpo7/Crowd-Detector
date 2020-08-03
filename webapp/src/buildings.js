@@ -208,7 +208,10 @@ class SensorsView extends React.Component {
 					<p><b><i>Type:</i></b> {sensor.roomtype}</p>
 					<p><b><i>People allowed</i></b>: {sensor.maxpeople}</p>
 					{/* <p><b><i>People in room</i></b>: {sensor.curr_people}</p> */}
-    				<Link to='#' className='btn button'>Show Statistics</Link>
+    				<Link to={{
+						pathname: '/stats',
+						state: {sensor}
+					}} className='btn button'>Show Statistics</Link>
   				</div>
 			</div>
 		);
@@ -317,7 +320,7 @@ class Building extends React.Component {
 	render() {
 		return (
 			<>
-				<TitleBar />,
+				<TitleBar text={this.state.building}/>,
 				<Search 
 					numfloors={this.state.numfloors}
 					onClick={this.updateSensorView}
