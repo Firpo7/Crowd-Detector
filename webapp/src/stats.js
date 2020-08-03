@@ -12,7 +12,7 @@ function RoomData(props) {
             </div>
             <div className='singleData'>
                 <div className='dataTitle'>OCCUPANCY</div>
-                <div className='dataValue'>{props.room.maxpeople} ppl.</div>
+                <div className='dataValue'>{props.room.maxpeople} ppl</div>
             </div>
             <div className='singleData'>
                 <div className='dataTitle'>TYPE</div>

@@ -237,13 +237,14 @@ class Building extends React.Component {
 			maxpeople: params.maxpeople,
 			numfloors: params.numfloors,
 			sensors: [],
-			sensorsToShow: []
+			sensorsToShow: [],
+			interval: null
 		}
 
 		this.updateSensorView = this.updateSensorView.bind(this);
 
 		//get the people count every 5 minutes to update the view
-		setInterval(() => this.fetchSensorsInBuildings(), FIVE_MINUTES);
+		this.state.interval = setInterval(() => this.fetchSensorsInBuildings(), FIVE_MINUTES);
 	}
 
 	fetchCurrentPeople(sensors, ids) {
@@ -290,6 +291,10 @@ class Building extends React.Component {
 
 	componentDidMount() {
 		this.fetchSensorsInBuildings();
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.state.interval);
 	}
 
 	updateSensorView(types, floors) {
