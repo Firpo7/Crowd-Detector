@@ -1,5 +1,6 @@
 import React from 'react';
-import TitleBar from './common/common.js';
+import TitleBar, { API } from './common/common.js';
+import Chart from 'chart.js';
 
 import './css/stats.css';
 
@@ -23,9 +24,55 @@ function RoomData(props) {
 }
 
 class StatsChart extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            id: props.id,
+            data: [],
+            statsChartName: 'statsChart'
+        };
+    }
+
+    fetchStatistics() {
+        fetch(API + '/getStatistics?optionRange=today&op=all&id=' + this.state.id)
+            .then(response => response.json())
+            .then(statsObj => {
+                if (statsObj.code === 42) {
+                    let context = document.getElementById(this.state.statsChartName);
+                    let toPlot = {};
+                  
+                    let labels = [];
+                    let values = [];
+
+                    const datas = statsObj.datas;
+                    for (let stat of datas) {
+                        labels.push(stat.t);    //TODO: refactor labels
+                        values.push(stat.result);
+                    }
+                    
+                    toPlot['labels'] = labels;
+                    toPlot['datasets'] = [{
+                        data: values,
+                        label: 'People in the room',
+                        fill: false
+                    }]
+
+                    let chart = new Chart(context, {
+                        type: 'line',
+                        data: toPlot
+                    });
+                }
+            });
+    }
+
+    componentDidMount() {
+        this.fetchStatistics();
+    }
+
     render() {
         return (
-            <div className='test' />
+            <canvas id={this.state.statsChartName} className='test' width='200' height='100'/>
         );
     }
 }
@@ -36,7 +83,6 @@ class Stats extends React.Component {
 
         let params = this.props.location.state.sensor;
 
-        console.log(params);
         this.state = {
             sensor: params
         };
@@ -48,7 +94,7 @@ class Stats extends React.Component {
                 <TitleBar text={this.state.sensor.name}/>
                 <div style={{'display': 'flex', 'flexDirection': 'row'}}>
                     <RoomData room={this.state.sensor}/>
-                    <StatsChart />
+                    <StatsChart id={this.state.sensor.id}/>
                 </div>
             </>
         );

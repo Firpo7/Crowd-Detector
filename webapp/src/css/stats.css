@@ -37,9 +37,9 @@
 }
 
 .test {
-    width: 45%;
-    height: 20em;
-    background-color: blue; 
+    /*width: 45%;
+    height: 20em;*/
+    background-color: white; 
     display: inline-block;
     margin-left: 3%;
     margin-top: 5%;
