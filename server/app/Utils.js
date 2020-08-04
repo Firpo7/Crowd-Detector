@@ -36,11 +36,11 @@ function checkGUID(guid) {
 }
 
 function checkOperation(op) {
-  return ParamsConstants.OPERATION.has(op)
+  return Object.values(ParamsConstants.OPERATIONS).indexOf(op) >= 0
 }
 
 function checkOptionRange(op) {
-  return ParamsConstants.OPTIONRANGE.has(op)
+  return Object.values(ParamsConstants.OPTION_RANGES).indexOf(op) >= 0
 }
 
 

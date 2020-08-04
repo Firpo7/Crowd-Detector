@@ -31,14 +31,12 @@ function getBuildingController(req, res) {
 function getStatisticsController(req, res) {
   if( !( Utils.checkParamString(req.query.op) && Utils.checkOperation(req.query.op) ) ||
       !( Utils.checkParamString(req.query.optionRange) && Utils.checkOptionRange(req.query.optionRange) ) ||
-      !( (Utils.checkParamString(req.query.id) && Utils.checkGUID(req.query.id))  || 
-         (req.query.id instanceof Array && req.query.id.every(Utils.checkGUID)) )
-      ) {
+      !( Utils.checkParamString(req.query.id) && Utils.checkGUID(req.query.id) ) ) {
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
-  let ids = Utils.getListOf(req.query.id)
-  UtilsDB.getStatisticsFromDB(ids, req.query.op.toLowerCase(), req.query.optionRange.toLowerCase())
+
+  UtilsDB.getStatisticsFromDB( req.query.id, req.query.op.toLowerCase(), req.query.optionRange.toLowerCase())
   .then((rows) => res.send({code: APIconstants.API_CODE_SUCCESS, datas: rows}))
   .catch((err) => {res.send({code: (err.code || APIconstants.API_CODE_GENERAL_ERROR)}) ; if (err.code) console.log(err) })
 }
