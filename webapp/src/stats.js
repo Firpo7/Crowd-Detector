@@ -30,6 +30,7 @@ class StatsChart extends React.Component {
         this.state = {
             id: props.id,
             data: [],
+            room: props.name,
             statsChartName: 'statsChart'
         };
     }
@@ -40,7 +41,9 @@ class StatsChart extends React.Component {
             .then(statsObj => {
                 if (statsObj.code === 42) {
                     let context = document.getElementById(this.state.statsChartName);
+
                     let toPlot = {};
+                    let options = {};
                   
                     let labels = [];
                     let values = [];
@@ -55,12 +58,19 @@ class StatsChart extends React.Component {
                     toPlot['datasets'] = [{
                         data: values,
                         label: 'People in the room',
+                        borderColor: '#e8c3b9',
                         fill: false
                     }]
 
+                    options['title'] = {
+                        display: true,
+                        text: `People in ${this.state.room} today`
+                    };
+
                     let chart = new Chart(context, {
                         type: 'line',
-                        data: toPlot
+                        data: toPlot,
+                        options: options
                     });
                 }
             });
@@ -94,7 +104,10 @@ class Stats extends React.Component {
                 <TitleBar text={this.state.sensor.name}/>
                 <div style={{'display': 'flex', 'flexDirection': 'row'}}>
                     <RoomData room={this.state.sensor}/>
-                    <StatsChart id={this.state.sensor.id}/>
+                    <StatsChart 
+                        id={this.state.sensor.id}
+                        name={this.state.sensor.name}
+                    />
                 </div>
             </>
         );
