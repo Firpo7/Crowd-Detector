@@ -9,10 +9,10 @@ function TitleBar() {
 	return (
 		<div className='opaqueContainer'>
 			<div className='imgtitle'/>
-			<div className='textCenter'>
+			<div className='text-center mx-3'>
 				<h1 className='algerian'>UNIGE Crowd Detector</h1>
 			</div>
-			<div className='imgtitle'/>
+			<div className='imgtitle d-none d-md-block'/>
 		</div>	
 	);
 }
