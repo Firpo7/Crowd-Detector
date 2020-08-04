@@ -28,7 +28,7 @@ function FloorDrowpdown(props) {
 				valueKey='id'
 				labelKey='name'
 				multiple
-				placeholder='Select floors...'
+				placeholder={<span><span class="d-none d-sm-inline-block">Select </span> Floors...</span>}
 				dropdownHeight={600}
 				numberDisplayed={1}
 				manySelectedPlaceholder={selected.length + ' selected...'}
@@ -85,7 +85,7 @@ function TypeDrowpdown(props) {
 				valueKey='id'
 				labelKey='name'
 				multiple
-				placeholder='Type of room...'
+				placeholder={<span><span class="d-none d-md-inline-block">Select Room </span> Types...</span>}
 				dropdownHeight={600}
 				numberDisplayed={1}
 				manySelectedPlaceholder={selected.length + ' selected...'}
