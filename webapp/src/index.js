@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+
 import TitleBar, { API } from './common/common.js';
 import Building from './buildings.js';
+import Stats from './stats.js';
 
 import './css/index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -101,7 +103,7 @@ class MainPage extends React.Component {
 	render() {
 		return (
 			<>
-				<TitleBar />
+				<TitleBar text={'UNIGE Crowd Detector'}/>
 				<SearchBar onClick={this.updateBuildingsView}/>
 				<BuildingsView buildings={this.state.buildingsToShow}/>
 			</>
@@ -114,6 +116,7 @@ ReactDOM.render(
 	<Router>
 		<Route path='/' exact={true} component={MainPage} />
 		<Route path='/building' exact={true} component={Building} />
+		<Route path='/stats' exact={true} component={Stats} />
 	</Router>,
 
 	document.getElementById('root')

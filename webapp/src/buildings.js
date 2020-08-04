@@ -208,7 +208,10 @@ class SensorsView extends React.Component {
 					<p><b><i>Type:</i></b> {sensor.roomtype}</p>
 					<p><b><i>People allowed</i></b>: {sensor.maxpeople}</p>
 					{/* <p><b><i>People in room</i></b>: {sensor.curr_people}</p> */}
-    				<Link to='#' className='btn button'>Show Statistics</Link>
+    				<Link to={{
+						pathname: '/stats',
+						state: {sensor}
+					}} className='btn button'>Show Statistics</Link>
   				</div>
 			</div>
 		);
@@ -234,13 +237,14 @@ class Building extends React.Component {
 			maxpeople: params.maxpeople,
 			numfloors: params.numfloors,
 			sensors: [],
-			sensorsToShow: []
+			sensorsToShow: [],
+			interval: null
 		}
 
 		this.updateSensorView = this.updateSensorView.bind(this);
 
 		//get the people count every 5 minutes to update the view
-		setInterval(() => this.fetchSensorsInBuildings(), FIVE_MINUTES);
+		this.state.interval = setInterval(() => this.fetchSensorsInBuildings(), FIVE_MINUTES);
 	}
 
 	fetchCurrentPeople(sensors, ids) {
@@ -289,6 +293,10 @@ class Building extends React.Component {
 		this.fetchSensorsInBuildings();
 	}
 
+	componentWillUnmount() {
+		clearInterval(this.state.interval);
+	}
+
 	updateSensorView(types, floors) {
 		if (!types.length && !floors.length) {
 			this.setState({sensorsToShow: this.state.sensors});
@@ -317,7 +325,7 @@ class Building extends React.Component {
 	render() {
 		return (
 			<>
-				<TitleBar />,
+				<TitleBar text={this.state.building}/>,
 				<Search 
 					numfloors={this.state.numfloors}
 					onClick={this.updateSensorView}

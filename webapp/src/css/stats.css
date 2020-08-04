@@ -1,0 +1,46 @@
+.roomDataWrapper {
+    width: 45%;
+    height: max-content;
+    margin-left: 3%;
+    margin-top: 5%;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 5px dashed #36f;
+    box-shadow: 0 0 0 2.5px #226741, 
+                0 0 0 5px beige,
+                inset 0 0 0 2.5px #226741,
+                0 5px 10px 15px rgba(0, 0, 0, 0.5),
+                inset 0 0 100vw 100vw beige;
+    display: inline-block;
+}
+
+.singleData {
+    margin-top: 2%;
+    margin-bottom: 2%;
+    margin-left: 10%;
+}
+
+.dataTitle {
+    border: 2px solid black;
+    font-size: xx-large;
+    display: inline-block;
+    width: 40%;
+    margin-right: 5%;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.dataValue {
+    border: 2px solid brown;
+    display: inline-block;
+    font-size: xx-large;
+    width: 45%;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.test {
+    width: 45%;
+    height: 20em;
+    background-color: blue; 
+    display: inline-block;
+    margin-left: 3%;
+    margin-top: 5%;
+}
