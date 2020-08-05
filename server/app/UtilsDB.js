@@ -55,18 +55,18 @@ function deleteFromDB(table, where) {
 function getPublicID(private_id) {
   let toPromise = function(resolve, reject) {
     redis_client.get(private_id, (err, public_id) => {
-      if (err) { reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }) }
+      if (err) { reject(err) }
       
       //if no match found in redis
       if (public_id != null) {
         resolve(public_id)
       } else {
         knex.select('public_id').from('sensor').where('private_id', private_id).then((rows) => {
-          if (!rows.length) { reject({code: APIconstants.API_CODE_INVALID_DATA, err:'no sensor found'}) ; return }
+          if (!rows.length) { reject(`no sensors found in DB for private ID: ${private_id}`) ; return }
           let public_id = rows[0].public_id
           redis_client.setex(private_id, 3600, public_id);
           resolve(public_id)
-        }).catch((err) => { reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }) })
+        }).catch((err) => { reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }); console.log(err) })
       }
     });
   }
@@ -139,7 +139,7 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
         break;
       
       default:
-        reject({ code: APIconstants.API_CODE_INVALID_DATA, err: 'invalid operation' });
+        reject(`no operation found for: ${operation}`);
         return;
     }
 
@@ -148,9 +148,7 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
 
     switch (option_range) {
       case ParamConstants.OPTION_RANGES.TODAY:
-        let tomorrow_date = new Date(today_date.getTime())
-        tomorrow_date.setDate(tomorrow_date.getDate() + 1)
-        query.whereBetween('time', [today_date, tomorrow_date])
+        query.where('time', '>', today_date)
         break;
       
       case ParamConstants.OPTION_RANGES.YESTERDAY:
@@ -172,7 +170,7 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
         break;
       
       default:
-        reject({ code: APIconstants.API_CODE_INVALID_DATA, err: 'invalid option range' });
+        reject(`no operation found for: ${option_range}`);
         return;
     }
 
@@ -182,9 +180,8 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
       'result': operation_column}
       )
     if ( operation !== ParamConstants.OPERATIONS.ALL_STATISTICS) query.groupBy('t')
-    query
-      .then(rows => resolve(rows))
-      .catch(err => reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }))
+    query.then((rows) => resolve(rows))
+    .catch((err) => reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }))
   }
   return new Promise(toPromise)
 }
@@ -192,11 +189,12 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
 function checkFloorBuilding(building, floor) {
   let toPromise = function( resolve, reject ) {
     getBuildingsFromDB(building)
-    .then(rows => {
-      if (!rows.length || floor > rows[0].maxFloor) reject({ code: APIconstants.API_CODE_INVALID_DATA, err: `no data in DB: ${building}` })
+    .then((rows) => {
+      if (!rows.length) reject(`no building found: ${building}`)
+      if (floor > rows[0].maxFloor) reject(`floor too high for building: ${building}`)
       resolve()
     })
-    .catch(err => reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }))
+    .catch((err) => reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }))
   }
   return new Promise(toPromise)
 }
@@ -204,12 +202,12 @@ function checkFloorBuilding(building, floor) {
 function checkValidityToken(token) {
   let toPromise = function( resolve, reject ) {
     redis_client.get(token, (err, validity) => {
-      if (err) { reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }) }
+      if (err) { reject(err) }
         
       //if no match found in redis
       if (validity != null) {
         if (new Date(validity) < new Date()) {
-          reject({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS, err: `unauthorized access with token: ${token}` })
+          reject(`unauthorized access with token: ${token}`)
           return
         }
         resolve()
@@ -222,8 +220,8 @@ function checkValidityToken(token) {
             resolve() ; return
           }
         }
-        reject({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS, err: `unauthorized access with token: ${token}` })
-      }).catch(err => reject({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR), err: (err.err || err) }))
+        reject(`unauthorized access with token: ${token}`)
+      }).catch((err) => reject({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS, err: err }))
     })
   }
   return new Promise(toPromise)
