@@ -1,8 +1,8 @@
 .roomDataWrapper {
-    width: 45%;
+    width: 30%;
     height: max-content;
-    margin-left: 3%;
-    margin-top: 5%;
+    margin-left: 2%;
+    margin-top: 2%;
     background-color: rgba(255, 255, 255, 0.7);
     border: 5px dashed #36f;
     box-shadow: 0 0 0 2.5px #226741, 
@@ -21,7 +21,7 @@
 
 .dataTitle {
     border: 2px solid black;
-    font-size: xx-large;
+    font-size: large;
     display: inline-block;
     width: 40%;
     margin-right: 5%;
@@ -31,16 +31,16 @@
 .dataValue {
     border: 2px solid brown;
     display: inline-block;
-    font-size: xx-large;
+    font-size: large;
     width: 45%;
     font-family: 'Courier New', Courier, monospace;
 }
 
-.test {
-    /*width: 45%;
-    height: 20em;*/
+.chart {
+    max-width: 64% !important;
+    height: 400px !important;
     background-color: white; 
     display: inline-block;
-    margin-left: 3%;
-    margin-top: 5%;
+    margin-left: 2%;
+    margin-top: 2%;
 }

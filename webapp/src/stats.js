@@ -35,39 +35,83 @@ class StatsChart extends React.Component {
         };
     }
 
+    processTimeLabels(timeLabel) {
+        const date = new Date(timeLabel);
+        const options = {year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'};
+        const dateTimeFormat = new Intl.DateTimeFormat('it-IT', options);
+        return dateTimeFormat.format(date);
+    }
+
+    setChartsOptions() {
+        const options = {};
+
+        options['title'] = {
+            display: true,
+            text: `People in ${this.state.room} today`,
+            fontSize: 24
+        };
+
+        options['scales'] = {
+            xAxes: [{
+                ticks: {
+                    callback: (value, index, _) => {
+                        if (index % 6)
+                            return '';
+                        return value;
+                    }
+                }
+            }],
+            yAxes: [{
+                stacked: true
+            }]
+        };
+
+        options['tooltips'] = {
+            bodyFontSize: 20
+        };
+
+        options['legend'] = {
+            display: false
+        }
+
+        return options;
+    }
+
+    setDataToPlot(statsObj) {
+        const toPlot = {};
+        const labels = [];
+        const values = [];
+
+        const datas = statsObj.datas.sort((o1, o2) => o1.t > o2.t);
+
+        for (let stat of datas) {       
+            labels.push(this.processTimeLabels(stat.t));
+            values.push(stat.result);
+        }
+        
+        toPlot['labels'] = labels;
+        toPlot['datasets'] = [
+            {
+                data: values,
+                label: 'People in the room',
+                borderColor: '#e8c3b9',
+                fill: false
+            }
+        ];
+
+        return toPlot;
+    }
+
     fetchStatistics() {
         fetch(API + '/getStatistics?optionRange=today&op=all&id=' + this.state.id)
             .then(response => response.json())
             .then(statsObj => {
                 if (statsObj.code === 42) {
-                    let context = document.getElementById(this.state.statsChartName);
-
-                    let toPlot = {};
-                    let options = {};
-                  
-                    let labels = [];
-                    let values = [];
-
-                    const datas = statsObj.datas;
-                    for (let stat of datas) {
-                        labels.push(stat.t);    //TODO: refactor labels
-                        values.push(stat.result);
-                    }
+                    const context = document.getElementById(this.state.statsChartName);
+                    const toPlot = this.setDataToPlot(statsObj);
+                    const options = this.setChartsOptions();
                     
-                    toPlot['labels'] = labels;
-                    toPlot['datasets'] = [{
-                        data: values,
-                        label: 'People in the room',
-                        borderColor: '#e8c3b9',
-                        fill: false
-                    }]
-
-                    options['title'] = {
-                        display: true,
-                        text: `People in ${this.state.room} today`
-                    };
-
-                    let chart = new Chart(context, {
+                    new Chart(context, {
                         type: 'line',
                         data: toPlot,
                         options: options
@@ -82,7 +126,7 @@ class StatsChart extends React.Component {
 
     render() {
         return (
-            <canvas id={this.state.statsChartName} className='test' width='200' height='100'/>
+            <canvas id={this.state.statsChartName} className='chart'/>
         );
     }
 }
@@ -103,7 +147,10 @@ class Stats extends React.Component {
             <>
                 <TitleBar text={this.state.sensor.name}/>
                 <div style={{'display': 'flex', 'flexDirection': 'row'}}>
-                    <RoomData room={this.state.sensor}/>
+                    <>
+                        <RoomData room={this.state.sensor}/>
+                        {/* <OptionsCheckbox /> */}
+                    </>
                     <StatsChart 
                         id={this.state.sensor.id}
                         name={this.state.sensor.name}
