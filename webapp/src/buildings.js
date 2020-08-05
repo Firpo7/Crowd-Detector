@@ -28,7 +28,7 @@ function FloorDrowpdown(props) {
 				valueKey='id'
 				labelKey='name'
 				multiple
-				placeholder={<span><span class="d-none d-sm-inline-block">Select </span> Floors...</span>}
+				placeholder={<span><span className="d-none d-sm-inline-block">Select </span> Floors...</span>}
 				dropdownHeight={600}
 				numberDisplayed={1}
 				manySelectedPlaceholder={selected.length + ' selected...'}
@@ -85,7 +85,7 @@ function TypeDrowpdown(props) {
 				valueKey='id'
 				labelKey='name'
 				multiple
-				placeholder={<span><span class="d-none d-md-inline-block">Select Room </span> Types...</span>}
+				placeholder={<span><span className="d-none d-md-inline-block">Select Room </span> Types...</span>}
 				dropdownHeight={600}
 				numberDisplayed={1}
 				manySelectedPlaceholder={selected.length + ' selected...'}
@@ -194,12 +194,12 @@ class SensorsView extends React.Component {
 			<div key={sensor.id} className="product-card" style={
 				/* 
 					Color-code for rooms:
-						RED    -> more than 80% full
-						YELLOW -> more than 60% full
+						RED    -> more than 85% full
+						YELLOW -> more than 55% full
 						GREEN  -> otherwise
 				*/
-				sensor.curr_people >= parseInt(sensor.maxpeople*0.8) ? {'backgroundColor': '#ff6961', 'color': '#963d35'} :
-				sensor.curr_people >= parseInt(sensor.maxpeople*0.5) ? {'backgroundColor': '#ffee75', 'color': '#7c5407'} :
+				sensor.curr_people >= parseInt(sensor.maxpeople*0.85) ? {'backgroundColor': '#ff6961', 'color': '#963d35'} :
+				sensor.curr_people >= parseInt(sensor.maxpeople*0.55) ? {'backgroundColor': '#ffee75', 'color': '#7c5407'} :
 				{'backgroundColor': 'lightgreen', 'color': '#435e55'}
 			}>
   				<div className="product-details">
@@ -251,28 +251,29 @@ class Building extends React.Component {
 		const idsString = ids.map(id => 'id=' + id + '&').join('').slice(0, -1);
 
 		fetch(API + '/getSimpleStatistics?' + idsString)
-		.then(people => people.json())
-		.then(peopleObj => {
-			if (peopleObj.code === 42) {
-				let updatedSensors = [];
-				let peopleValuesMap = {};
+			.then(people => people.json())
+			.then(peopleObj => {
+				if (peopleObj.code === 42) {
+					let updatedSensors = [];
+					let peopleValuesMap = {};
 
-				peopleObj.datas.forEach(val => {
-					peopleValuesMap[val.sensor_id] = val.current_people;
-				});
+					peopleObj.datas.forEach(val => {
+						peopleValuesMap[val.sensor_id] = val.current_people;
+					});
 
-				sensors.forEach(s => {
-					let id = s.id;
-					s.curr_people = peopleValuesMap.hasOwnProperty(id) ? peopleValuesMap[id] : 0;
-					updatedSensors.push(s);
-				});
-				
-				this.setState({
-					sensors: updatedSensors,
-					sensorsToShow: updatedSensors
-				});
+					sensors.forEach(s => {
+						let id = s.id;
+						s.curr_people = peopleValuesMap.hasOwnProperty(id) ? peopleValuesMap[id] : 0;
+						updatedSensors.push(s);
+					});
+					
+					this.setState({
+						sensors: updatedSensors,
+						sensorsToShow: updatedSensors
+					});
+				}
 			}
-		});
+		);
 	}
 
 	fetchSensorsInBuildings() {
