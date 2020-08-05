@@ -101,9 +101,10 @@ function getBuildingsFromDB(name) {
 
 function getSimpleStatisticsFromDB(listOfIdSensors=[]) {
   let toPromise = function( resolve, reject ) {
-    knex.select('sensor_data.sensor_id', 'sensor_data.current_people')
+    let thirtyMinutesAgo = new Date( Date.now() - 1800000 ); // 1000 * 60 * 30
+    knex.select('sensor_data.sensor_id', "sensor_data.current_people")
     .from('sensor_data').join(
-      knex.select('sensor_id', knex.ref(knex.raw('MAX(time)')).as('lasttime') ).from('sensor_data').groupBy('sensor_id').as('tmp'),
+      knex.select('sensor_id', knex.ref(knex.raw('MAX(time)')).as('lasttime') ).from('sensor_data').groupBy('sensor_id').as('tmp').where('time', '>', thirtyMinutesAgo),
       'sensor_data.sensor_id', '=', 'tmp.sensor_id'
     )
     .where(knex.raw('sensor_data.time=tmp.lasttime')).whereIn('sensor_data.sensor_id', listOfIdSensors)
