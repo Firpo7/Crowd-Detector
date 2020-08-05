@@ -178,36 +178,37 @@ function fillWithSimulatedData() {
     let adjust = Array(2);  //to simulate a more realistic flow of people
 
     const yy = 2020;
-    const MM = 7;   //july
-    for (let dd=1; dd<=31; dd++) {
-        currPeople[0] = getRandomInt(MAX_PEOPLE_PER_ROOM[SW1]);
-        currPeople[1] = getRandomInt(MAX_PEOPLE_PER_ROOM[LC]);
-        for (let hh=10; hh<21; hh++) {    //timetable DIBRIS: 8-19, UTC+2
-            for (let mm=0; mm<60; mm+=10) {
-                let coin = getRandomInt(100);
-                for (let i=0; i<adjust.length; i++)
-                    adjust[i] = parseInt(currPeople[i]/10) + (coin > 50 ? 1 : 0);
-                
-                currPeople[0] = 
-                    coin > 50 ? 
-                        (currPeople[0] + adjust[0] > MAX_PEOPLE_PER_ROOM[SW1] ? MAX_PEOPLE_PER_ROOM[SW1] : currPeople[0] + adjust[0]) :
-                        (currPeople[0] - adjust[0] < 0 ? 0 : currPeople[0] - adjust[0]);
-
-                currPeople[1] = 
-                    coin > 50 ? 
-                        (currPeople[1] + adjust[1] > MAX_PEOPLE_PER_ROOM[LC] ? MAX_PEOPLE_PER_ROOM[LC] : currPeople[1] + adjust[1]) :
-                        (currPeople[1] - adjust[1] < 0 ? 0 : currPeople[1] - adjust[1]);
-
-                for (let i=0; i<newPeople.length; i++)
-                    newPeople[i] = coin > 50 ? parseInt(currPeople[i]/10) : 0;
-
-                let time = new Date(`${MM}/${dd}/${yy} ${hh}:${mm}`).toISOString();
-
-                updatePeopleCount(sensors_ids[SW1], currPeople[0], newPeople[0], time);
-                updatePeopleCount(sensors_ids[LC], currPeople[1], newPeople[1], time);
+    for (let MM=7; MM<=8; MM++) { //july and august
+        for (let dd=1; dd<=31; dd++) {
+            currPeople[0] = getRandomInt(MAX_PEOPLE_PER_ROOM[SW1]);
+            currPeople[1] = getRandomInt(MAX_PEOPLE_PER_ROOM[LC]);
+            for (let hh=10; hh<21; hh++) {    //timetable DIBRIS: 8-19, UTC+2
+                for (let mm=0; mm<60; mm+=10) {
+                    let coin = getRandomInt(100);
+                    for (let i=0; i<adjust.length; i++)
+                        adjust[i] = parseInt(currPeople[i]/10) + (coin > 50 ? 1 : 0);
+                    
+                    currPeople[0] = 
+                        coin > 50 ? 
+                            (currPeople[0] + adjust[0] > MAX_PEOPLE_PER_ROOM[SW1] ? MAX_PEOPLE_PER_ROOM[SW1] : currPeople[0] + adjust[0]) :
+                            (currPeople[0] - adjust[0] < 0 ? 0 : currPeople[0] - adjust[0]);
+    
+                    currPeople[1] = 
+                        coin > 50 ? 
+                            (currPeople[1] + adjust[1] > MAX_PEOPLE_PER_ROOM[LC] ? MAX_PEOPLE_PER_ROOM[LC] : currPeople[1] + adjust[1]) :
+                            (currPeople[1] - adjust[1] < 0 ? 0 : currPeople[1] - adjust[1]);
+    
+                    for (let i=0; i<newPeople.length; i++)
+                        newPeople[i] = coin > 50 ? parseInt(currPeople[i]/10) : 0;
+    
+                    let time = new Date(`${MM}/${dd}/${yy} ${hh}:${mm}`).toISOString();
+    
+                    updatePeopleCount(sensors_ids[SW1], currPeople[0], newPeople[0], time);
+                    updatePeopleCount(sensors_ids[LC], currPeople[1], newPeople[1], time);
+                }
             }
         }
-    }
+    }   
 }
 
 // MAIN
