@@ -192,12 +192,14 @@ class SensorsView extends React.Component {
 	renderSensor(sensor) {
 		return (
 			<div key={sensor.id} className="product-card" style={
+				console.log(sensor) || 
 				/* 
 					Color-code for rooms:
 						RED    -> more than 85% full
 						YELLOW -> more than 55% full
 						GREEN  -> otherwise
 				*/
+				!sensor.active ? {'backgroundColor': '#cccccc'} :
 				sensor.curr_people >= parseInt(sensor.maxpeople*0.85) ? {'backgroundColor': '#ff6961', 'color': '#963d35'} :
 				sensor.curr_people >= parseInt(sensor.maxpeople*0.55) ? {'backgroundColor': '#ffee75', 'color': '#7c5407'} :
 				{'backgroundColor': 'lightgreen', 'color': '#435e55'}
@@ -263,7 +265,16 @@ class Building extends React.Component {
 
 					sensors.forEach(s => {
 						let id = s.id;
-						s.curr_people = peopleValuesMap.hasOwnProperty(id) ? peopleValuesMap[id] : 0;
+						
+						//update only sensor that have updated data
+						if (peopleValuesMap.hasOwnProperty(id)) {
+							s.curr_people = peopleValuesMap[id];
+							s.active = true;
+						} else {
+							s.curr_people = 0;
+							s.active = false;
+						}
+						
 						updatedSensors.push(s);
 					});
 					
@@ -284,6 +295,7 @@ class Building extends React.Component {
 					let sensors = sensorsObj.listOfNodes;
 					let ids = sensors.map(s => s.id);
 
+					sensors.forEach(s => s.active = false);
 					this.fetchCurrentPeople(sensors, ids);
 				}
 			}
