@@ -3,7 +3,7 @@ import React from 'react';
 
 import '../css/common.css';
 
-export const API   = process.env.NODE_ENV === 'development' ? '' : 'http://iot-proj00.herokuapp.com';
+export const API   =  'http://iot-proj00.herokuapp.com';
 
 function TitleBar(props) {
 	return (

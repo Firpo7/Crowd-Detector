@@ -226,7 +226,7 @@ class StatsChart extends React.Component {
 
     render() {
         return (
-            <canvas id={this.state.statsChartName} className='chart'/>
+            <div className="canvas-containter mx-auto"><canvas id={this.state.statsChartName} className='chart'/></div>
         );
     }
 }
