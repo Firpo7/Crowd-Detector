@@ -4,6 +4,13 @@ import Chart from 'chart.js';
 
 import './css/stats.css';
 
+const REQUESTS = {
+    TODAY:     '/getStatistics?optionRange=today&op=all&id=',
+    YESTERDAY: '/getStatistics?optionRange=yesterday&op=all&id=',
+    LASTWEEK:  '/getStatistics?optionRange=lastweek&op=all&id=',
+    LASTMONTH: '/getStatistics?optionRange=lastmonth&op=all&id='
+};
+
 function RoomData(props) {
     return (
         <div className='roomDataWrapper'>
@@ -19,8 +26,47 @@ function RoomData(props) {
                 <div className='dataTitle'>TYPE</div>
                 <div className='dataValue'>{props.room.roomtype}</div>
             </div>
+            <OptionCheckboxSelector />
         </div>
     );
+}
+
+class OptionCheckboxSelector extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            selected: null
+        };
+    }
+
+    render() {
+        return (
+            <div className='form'>
+                <h3>Select time window:</h3>
+
+                <div className='inputGroup'>
+                    <input id='today' name='radio' type='radio' defaultChecked/>
+                    <label htmlFor='today'>Today</label>
+                </div>
+
+                <div className='inputGroup'>
+                    <input id='yesterday' name='radio' type='radio'/>
+                    <label htmlFor='yesterday'>Yesterday</label>
+                </div>
+
+                <div className='inputGroup'>
+                    <input id='lastweek' name='radio' type='radio'/>
+                    <label htmlFor='lastweek'>Last Week</label>
+                </div>
+
+                <div className='inputGroup'>
+                    <input id='lastmonth' name='radio' type='radio'/>
+                    <label htmlFor='lastmonth'>Last Month</label>
+                </div>
+            </div>
+        );
+    }
 }
 
 class StatsChart extends React.Component {
@@ -103,7 +149,7 @@ class StatsChart extends React.Component {
     }
 
     fetchStatistics() {
-        fetch(API + '/getStatistics?optionRange=today&op=all&id=' + this.state.id)
+        fetch(API + REQUESTS.TODAY + this.state.id)
             .then(response => response.json())
             .then(statsObj => {
                 if (statsObj.code === 42) {
@@ -147,14 +193,12 @@ class Stats extends React.Component {
             <>
                 <TitleBar text={this.state.sensor.name}/>
                 <div style={{'display': 'flex', 'flexDirection': 'row'}}>
-                    <>
-                        <RoomData room={this.state.sensor}/>
-                        {/* <OptionsCheckbox /> */}
-                    </>
+                    <RoomData room={this.state.sensor}/>
                     <StatsChart 
                         id={this.state.sensor.id}
                         name={this.state.sensor.name}
                     />
+                    {/* <OptionCheckboxSelector /> */}
                 </div>
             </>
         );
