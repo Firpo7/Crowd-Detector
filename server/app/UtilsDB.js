@@ -144,11 +144,13 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
     }
 
     let current_date = new Date()
-    let today_date = new Date(Date.UTC(current_date.getUTCFullYear(), current_date.getUTCMonth(), current_date.getUTCDate()));
+    let today_date = new Date(Date.UTC(current_date.getUTCFullYear(), current_date.getUTCMonth(), current_date.getUTCDate()))
 
     switch (option_range) {
       case ParamConstants.OPTION_RANGES.TODAY:
-        query.where('time', '>', today_date)
+				let tomorrow_date = new Date(today_date.getTime())
+				tomorrow_date.setDate(tomorrow_date.getDate() + 1)
+        query.whereBetween('time', [today_date, tomorrow_date])
         break;
       
       case ParamConstants.OPTION_RANGES.YESTERDAY:
