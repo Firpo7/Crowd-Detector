@@ -29,13 +29,10 @@
 }
 
 .product-details h1 {
-  /*color: #333;*/
   font-family: "Pacifico", cursive;
-  /*font-size: 24px;*/
 }
 
 .product-details .button {
-  /*width: 6rem;*/
   margin-top: 20px;
   background-color: #337AB7;
   border-radius: 0;

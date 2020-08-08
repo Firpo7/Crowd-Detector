@@ -192,7 +192,6 @@ class SensorsView extends React.Component {
 	renderSensor(sensor) {
 		return (
 			<div key={sensor.id} className="product-card" style={
-				console.log(sensor) || 
 				/* 
 					Color-code for rooms:
 						RED    -> more than 85% full
