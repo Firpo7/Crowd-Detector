@@ -4,12 +4,19 @@ import Chart from 'chart.js';
 
 import './css/stats.css';
 
-const REQUESTS = {
-    TODAY:     '/getStatistics?optionRange=today&op=all&id=',
-    YESTERDAY: '/getStatistics?optionRange=yesterday&op=all&id=',
-    LASTWEEK:  '/getStatistics?optionRange=lastweek&op=all&id=',
-    LASTMONTH: '/getStatistics?optionRange=lastmonth&op=all&id='
-};
+function buildAllRequest(timeOption) {
+    if (timeOption === TIME_OPTIONS.TODAY || timeOption === TIME_OPTIONS.YESTERDAY)
+        return `/getStatistics?optionRange=${timeOption}&op=all&id=`;
+    
+    return `/getStatistics?optionRange=${timeOption}&op=avg&id=`;
+}
+
+const TIME_OPTIONS = {
+    TODAY: 'today',
+    YESTERDAY: 'yesterday',
+    LASTWEEK: 'lastweek',
+    LASTMONTH: 'lastmonth'
+}
 
 function RoomData(props) {
     return (
@@ -26,47 +33,37 @@ function RoomData(props) {
                 <div className='dataTitle'>TYPE</div>
                 <div className='dataValue'>{props.room.roomtype}</div>
             </div>
-            <OptionCheckboxSelector />
+            <OptionCheckboxSelector onClick={props.onClick} />
         </div>
     );
 }
 
-class OptionCheckboxSelector extends React.Component {
-    constructor(props) {
-        super(props);
+function OptionCheckboxSelector(props) {
+    return (
+        <div className='form'>
+            <h3>Select time window:</h3>
 
-        this.state = {
-            selected: null
-        };
-    }
-
-    render() {
-        return (
-            <div className='form'>
-                <h3>Select time window:</h3>
-
-                <div className='inputGroup'>
-                    <input id='today' name='radio' type='radio' defaultChecked/>
-                    <label htmlFor='today'>Today</label>
-                </div>
-
-                <div className='inputGroup'>
-                    <input id='yesterday' name='radio' type='radio'/>
-                    <label htmlFor='yesterday'>Yesterday</label>
-                </div>
-
-                <div className='inputGroup'>
-                    <input id='lastweek' name='radio' type='radio'/>
-                    <label htmlFor='lastweek'>Last Week</label>
-                </div>
-
-                <div className='inputGroup'>
-                    <input id='lastmonth' name='radio' type='radio'/>
-                    <label htmlFor='lastmonth'>Last Month</label>
-                </div>
+            <div className='inputGroup'>
+                <input id={TIME_OPTIONS.TODAY} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.TODAY)} defaultChecked />
+                <label htmlFor={TIME_OPTIONS.TODAY}>Today</label>
             </div>
-        );
-    }
+
+            <div className='inputGroup'>
+                <input id={TIME_OPTIONS.YESTERDAY} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.YESTERDAY)} />
+                <label htmlFor={TIME_OPTIONS.YESTERDAY}>Yesterday</label>
+            </div>
+
+            <div className='inputGroup'>
+                <input id={TIME_OPTIONS.LASTWEEK} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.LASTWEEK)} />
+                <label htmlFor={TIME_OPTIONS.LASTWEEK}>Last Week</label>
+            </div>
+
+            <div className='inputGroup'>
+                <input id={TIME_OPTIONS.LASTMONTH} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.LASTMONTH)} />
+                <label htmlFor={TIME_OPTIONS.LASTMONTH}>Last Month</label>
+            </div>
+        </div>
+    );
 }
 
 class StatsChart extends React.Component {
@@ -77,15 +74,46 @@ class StatsChart extends React.Component {
             id: props.id,
             data: [],
             room: props.name,
-            statsChartName: 'statsChart'
+            statsChartName: 'statsChart',
+            timeOption: props.timeOption,
+            chart: null,
         };
+    }
+
+    componentDidMount() {
+        this.fetchStatistics(TIME_OPTIONS.TODAY);
+    }
+
+    componentDidUpdate() {
+        if (this.state.timeOption !== this.props.timeOption) {
+            this.setState({timeOption: this.props.timeOption});
+            this.fetchStatistics(this.props.timeOption);
+        }
     }
 
     processTimeLabels(timeLabel) {
         const date = new Date(timeLabel);
-        const options = {year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'};
+        const options = 
+            this.state.timeOption === TIME_OPTIONS.TODAY || this.state.timeOption === TIME_OPTIONS.YESTERDAY ?
+            {year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'} :
+            {year: 'numeric', month: 'numeric', day: 'numeric'};
         const dateTimeFormat = new Intl.DateTimeFormat('it-IT', options);
         return dateTimeFormat.format(date);
+    }
+
+    parseTimeOptions(timeOption) {
+        switch(this.state.timeOption) {
+            case TIME_OPTIONS.TODAY:
+                return 'Today';
+            case TIME_OPTIONS.YESTERDAY:
+                return 'Yesterday';
+            case TIME_OPTIONS.LASTWEEK:
+                return 'Last Week'
+            case TIME_OPTIONS.LASTMONTH:
+                return 'Last Month';
+            default:
+                return '';
+        }
     }
 
     setChartsOptions() {
@@ -93,7 +121,7 @@ class StatsChart extends React.Component {
 
         options['title'] = {
             display: true,
-            text: `People in ${this.state.room} today`,
+            text: `People in ${this.state.room} ${this.parseTimeOptions(this.state.timeOption)}`,
             fontSize: 24
         };
 
@@ -101,9 +129,20 @@ class StatsChart extends React.Component {
             xAxes: [{
                 ticks: {
                     callback: (value, index, _) => {
-                        if (index % 6)
-                            return '';
-                        return value;
+                        switch(this.state.timeOption) {
+                            case TIME_OPTIONS.TODAY:
+                            case TIME_OPTIONS.YESTERDAY:
+                                if (index % 6)
+                                    return '';
+                                return value;
+
+                            case TIME_OPTIONS.LASTWEEK:
+                            case TIME_OPTIONS.LASTMONTH:
+                                return value;
+                            
+                            default:
+                                return '';
+                        }
                     }
                 }
             }],
@@ -113,7 +152,14 @@ class StatsChart extends React.Component {
         };
 
         options['tooltips'] = {
-            bodyFontSize: 20
+            bodyFontSize: 20,
+            callbacks: {
+                label: (tooltipItem, data) => {
+                    let label = data.datasets[tooltipItem.datasetIndex].label || '';
+                    label += ': ' + Math.round(tooltipItem.yLabel * 100) / 100;
+                    return label;
+                }
+            }
         };
 
         options['legend'] = {
@@ -148,8 +194,11 @@ class StatsChart extends React.Component {
         return toPlot;
     }
 
-    fetchStatistics() {
-        fetch(API + REQUESTS.TODAY + this.state.id)
+    fetchStatistics(timeOption) {
+        console.log('FETCHING:', timeOption);
+
+
+        fetch(API + buildAllRequest(timeOption) + this.state.id)
             .then(response => response.json())
             .then(statsObj => {
                 if (statsObj.code === 42) {
@@ -157,17 +206,18 @@ class StatsChart extends React.Component {
                     const toPlot = this.setDataToPlot(statsObj);
                     const options = this.setChartsOptions();
                     
-                    new Chart(context, {
-                        type: 'line',
-                        data: toPlot,
-                        options: options
+                    if (this.state.chart)
+                        this.state.chart.destroy();
+
+                    this.setState({chart:
+                        new Chart(context, {
+                            type: 'line',
+                            data: toPlot,
+                            options: options
+                        })
                     });
                 }
             });
-    }
-
-    componentDidMount() {
-        this.fetchStatistics();
     }
 
     render() {
@@ -184,21 +234,33 @@ class Stats extends React.Component {
         let params = this.props.location.state.sensor;
 
         this.state = {
-            sensor: params
+            sensor: params,
+            timeOption: TIME_OPTIONS.TODAY
         };
+
+        this.updateTimeOption = this.updateTimeOption.bind(this);
+    }
+
+    updateTimeOption(newTimeOption) {
+        this.setState({timeOption: newTimeOption});
     }
 
     render() {
         return (
             <>
-                <TitleBar text={this.state.sensor.name}/>
-                <div style={{'display': 'flex', 'flexDirection': 'row'}}>
-                    <RoomData room={this.state.sensor}/>
-                    <StatsChart 
+                <TitleBar 
+                    text={this.state.sensor.name}
+                />
+                <div className='container'>
+                    <RoomData
+                        room={this.state.sensor}
+                        onClick={this.updateTimeOption}
+                    />
+                    <StatsChart
                         id={this.state.sensor.id}
                         name={this.state.sensor.name}
+                        timeOption={this.state.timeOption}
                     />
-                    {/* <OptionCheckboxSelector /> */}
                 </div>
             </>
         );

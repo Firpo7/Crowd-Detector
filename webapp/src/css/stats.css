@@ -1,3 +1,8 @@
+.container {
+    display: flex;
+    flex-direction: row;
+}
+
 /* ===== DATA VIEW ===== */
 
 .roomDataWrapper {
@@ -25,7 +30,7 @@
     border: 2px solid black;
     font-size: large;
     display: inline-block;
-    width: 40%;
+    min-width: 40%;
     margin-right: 5%;
     font-family: 'Courier New', Courier, monospace;
 }
@@ -34,7 +39,7 @@
     border: 2px solid brown;
     display: inline-block;
     font-size: large;
-    width: 45%;
+    min-width: 45%;
     font-family: 'Courier New', Courier, monospace;
 }
 
@@ -163,4 +168,4 @@ html {
 code {
     background-color: #9AA3AC;
     padding: 0 8px;
-}  
+}
