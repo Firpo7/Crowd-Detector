@@ -137,7 +137,11 @@ class StatsChart extends React.Component {
                                 return value;
 
                             case TIME_OPTIONS.LASTWEEK:
+                                return value;
+
                             case TIME_OPTIONS.LASTMONTH:
+                                if (index % 3)
+                                    return '';
                                 return value;
                             
                             default:
