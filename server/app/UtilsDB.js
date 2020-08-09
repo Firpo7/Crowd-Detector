@@ -19,6 +19,14 @@ var knex = require('knex')({
     ...( process.env.DBSSL && {ssl: {
       rejectUnauthorized: false,
     }})
+  },
+  pool: {
+    afterCreate: (conn, done) => {
+      //IMPORTANT: set the correct timezone before running the program
+      conn.query('SET timezone="UTC-2";', err => {
+        done(err, conn);
+      });
+    }
   }
 });
 
@@ -101,10 +109,10 @@ function getBuildingsFromDB(name) {
 
 function getSimpleStatisticsFromDB(listOfIdSensors=[]) {
   let toPromise = function( resolve, reject ) {
-    let thirtyMinutesAgo = new Date( Date.now() - 1800000 ); // 1000 * 60 * 30
     knex.select('sensor_data.sensor_id', "sensor_data.current_people")
-    .from('sensor_data').join(
-      knex.select('sensor_id', knex.ref(knex.raw('MAX(time)')).as('lasttime') ).from('sensor_data').groupBy('sensor_id').as('tmp').where('time', '>', thirtyMinutesAgo),
+    .from('sensor_data')
+    .join(
+      knex.select('sensor_id', knex.ref(knex.raw('MAX(time)')).as('lasttime')).from('sensor_data').groupBy('sensor_id').as('tmp').whereRaw('time BETWEEN (now() - interval \'30 minutes\') AND now()'),
       'sensor_data.sensor_id', '=', 'tmp.sensor_id'
     )
     .where(knex.raw('sensor_data.time=tmp.lasttime')).whereIn('sensor_data.sensor_id', listOfIdSensors)
@@ -143,32 +151,24 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
         return;
     }
 
-    let current_date = new Date()
-    let today_date = new Date(Date.UTC(current_date.getUTCFullYear(), current_date.getUTCMonth(), current_date.getUTCDate()))
+    /*let current_date = new Date()
+    let today_date = new Date(Date.UTC(current_date.getUTCFullYear(), current_date.getUTCMonth(), current_date.getUTCDate()))*/
 
     switch (option_range) {
       case ParamConstants.OPTION_RANGES.TODAY:
-				let tomorrow_date = new Date(today_date.getTime())
-				tomorrow_date.setDate(tomorrow_date.getDate() + 1)
-        query.whereBetween('time', [today_date, tomorrow_date])
+        query.whereRaw('time BETWEEN current_date AND (current_date + interval \'1 days\')')
         break;
       
       case ParamConstants.OPTION_RANGES.YESTERDAY:
-        let yesterday_date = new Date(today_date.getTime())
-        yesterday_date.setDate(yesterday_date.getDate() - 1)
-        query.whereBetween('time', [yesterday_date, today_date])
+        query.whereRaw('time BETWEEN (current_date - interval \'1 days\') AND current_date')
         break;
       
       case ParamConstants.OPTION_RANGES.LAST_WEEK:
-        let lastweek_date = new Date(today_date.getTime())
-        lastweek_date.setDate(lastweek_date.getDate() - 7)
-        query.whereBetween('time', [lastweek_date, today_date])
+        query.whereRaw('time BETWEEN (current_date - interval \'7 days\') AND current_date')
         break;
       
       case ParamConstants.OPTION_RANGES.LAST_MONTH:
-        let lastmonth_date = new Date(today_date.getTime())
-        lastmonth_date.setDate(lastmonth_date.getDate() - 30)
-        query.whereBetween('time', [lastmonth_date, today_date])
+        query.whereRaw('time BETWEEN (current_date - interval \'30 days\') AND current_date')
         break;
       
       default:
