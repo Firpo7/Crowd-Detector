@@ -1,15 +1,22 @@
 .container {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.canvas-containter {
+    width: 100% !important;
+    max-width: 600px !important;
+    margin-top: 15px;
+    margin-bottom: 100px;
 }
 
 /* ===== DATA VIEW ===== */
 
 .roomDataWrapper {
-    width: 30%;
+    margin: auto;
     height: max-content;
-    margin-left: 2%;
-    margin-top: 2%;
     background-color: rgba(255, 255, 255, 0.7);
     border: 5px dashed #36f;
     box-shadow: 0 0 0 2.5px #226741, 
@@ -46,12 +53,10 @@
 /* ===== CHART ===== */
 
 .chart {
-    max-width: 64% !important;
-    height: 400px !important;
+    height: 140% !important;
+    max-height: 300px !important;
     background-color: white; 
     display: inline-block;
-    margin-left: 2%;
-    margin-top: 2%;
 }
 
 /* ===== CHECKBOXES ===== */
