@@ -19,14 +19,6 @@ var knex = require('knex')({
     ...( process.env.DBSSL && {ssl: {
       rejectUnauthorized: false,
     }})
-  },
-  pool: {
-    afterCreate: (conn, done) => {
-      //IMPORTANT: set the correct timezone before running the program
-      conn.query('SET timezone="UTC-2";', err => {
-        done(err, conn);
-      });
-    }
   }
 });
 
@@ -150,9 +142,6 @@ function getStatisticsFromDB(sensor_id, operation, option_range) {
         reject(`no operation found for: ${operation}`);
         return;
     }
-
-    /*let current_date = new Date()
-    let today_date = new Date(Date.UTC(current_date.getUTCFullYear(), current_date.getUTCMonth(), current_date.getUTCDate()))*/
 
     switch (option_range) {
       case ParamConstants.OPTION_RANGES.TODAY:
