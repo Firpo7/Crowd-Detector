@@ -78,6 +78,8 @@ class StatsChart extends React.Component {
             timeOption: props.timeOption,
             chart: null,
         };
+
+        console.log(process.env)
     }
 
     componentDidMount() {
@@ -93,11 +95,14 @@ class StatsChart extends React.Component {
 
     processTimeLabels(timeLabel) {
         const date = new Date(timeLabel);
+        date.setTime(date.getTime() + 2 * 60 * 60 * 1000);  //UTC+2, our timezone
+
         const options = 
             this.state.timeOption === TIME_OPTIONS.TODAY || this.state.timeOption === TIME_OPTIONS.YESTERDAY ?
             {year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'} :
             {year: 'numeric', month: 'numeric', day: 'numeric'};
-        const dateTimeFormat = new Intl.DateTimeFormat('it-IT', options);
+        const dateTimeFormat = new Intl.DateTimeFormat('en-GB', options);
+
         return dateTimeFormat.format(date);
     }
 
