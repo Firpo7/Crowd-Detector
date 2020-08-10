@@ -14,7 +14,6 @@ const MAX_PEOPLE_PER_ROOM = {
     'Room 710': 90,
     'Room 711': 70,
     'Room 506': 100,
-    'Studying area': 50,
     'Room 505': 60,
     'Library': 10,
     'Studying room': 75,
@@ -172,17 +171,20 @@ function updatePeopleCount(id, currP, newP, time) {
 function fillWithSimulatedData() {
     const SW1 = 'Lab SW-1';
     const LC  = 'Little kitchen';
+    const CR2 = 'Common room 2';
 
-    const currPeople = Array(2);
-    const newPeople = Array(2);
-    const adjust = Array(2);  //to simulate a more realistic flow of people
+    const currPeople = Array(3);
+    const newPeople = Array(3);
+    const adjust = Array(3);  //to simulate a more realistic flow of people
 
     const yy = 2020;
     for (let MM=7; MM<=8; MM++) { //july and august
         for (let dd=1; dd<=31; dd++) {
             currPeople[0] = getRandomInt(MAX_PEOPLE_PER_ROOM[SW1]);
             currPeople[1] = getRandomInt(MAX_PEOPLE_PER_ROOM[LC]);
-            for (let hh=10; hh<21; hh++) {    //timetable DIBRIS: 8-19, UTC+2
+            currPeople[2] = getRandomInt(MAX_PEOPLE_PER_ROOM[CR2]);
+
+            for (let hh=8; hh<19; hh++) {    //timetable DIBRIS: 8-19
                 for (let mm=0; mm<60; mm+=10) {
                     const coin = getRandomInt(100);
                     for (let i=0; i<adjust.length; i++)
@@ -197,6 +199,11 @@ function fillWithSimulatedData() {
                         coin < 50 ? 
                             (currPeople[1] + adjust[1] > MAX_PEOPLE_PER_ROOM[LC] ? MAX_PEOPLE_PER_ROOM[LC] : currPeople[1] + adjust[1]) :
                             (currPeople[1] - adjust[1] < 0 ? 0 : currPeople[1] - adjust[1]);
+
+                    currPeople[2] = 
+                            coin < 50 ? 
+                                (currPeople[2] + adjust[2] > MAX_PEOPLE_PER_ROOM[CR2] ? MAX_PEOPLE_PER_ROOM[CR2] : currPeople[2] + adjust[2]) :
+                                (currPeople[2] - adjust[2] < 0 ? 0 : currPeople[2] - adjust[2]);
     
                     for (let i=0; i<newPeople.length; i++)
                         newPeople[i] = coin > 50 ? parseInt(currPeople[i]/10) : 0;
@@ -205,6 +212,7 @@ function fillWithSimulatedData() {
     
                     updatePeopleCount(sensors_ids[SW1], currPeople[0], newPeople[0], time);
                     updatePeopleCount(sensors_ids[LC], currPeople[1], newPeople[1], time);
+                    updatePeopleCount(sensors_ids[CR2], currPeople[2], newPeople[2], time);
                 }
             }
         }
