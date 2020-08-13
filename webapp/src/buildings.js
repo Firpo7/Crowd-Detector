@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import TitleBar, { API } from './common/common.js';
 import { Picky } from 'react-picky';
 
@@ -62,6 +62,7 @@ function FloorDrowpdown(props) {
 	);
 };
 
+
 function TypeDrowpdown(props) {
 	const roomTypes = [
 		'office',
@@ -85,7 +86,7 @@ function TypeDrowpdown(props) {
 				valueKey='id'
 				labelKey='name'
 				multiple
-				placeholder={<span><span className="d-none d-md-inline-block">Select Room </span> Types...</span>}
+				placeholder={<span><span className='d-none d-md-inline-block'>Select Room </span> Types...</span>}
 				dropdownHeight={600}
 				numberDisplayed={1}
 				manySelectedPlaceholder={selected.length + ' selected...'}
@@ -119,16 +120,18 @@ function TypeDrowpdown(props) {
 	);
 };
 
+
 function SearchButton(props) {
 	return (
 		<div className='dropdown divBtn'>
 			<button className='searchBtn' onClick={props.onClick}>
 				<b>SEARCH</b>
-				<i className="fa fa-search"/>
+				<i className='fa fa-search'/>
 			</button>
 		</div>
 	);
 }
+
 
 class Search extends React.Component {
 	constructor(props) {
@@ -175,6 +178,7 @@ class Search extends React.Component {
 	}
 }
 
+
 class SensorsView extends React.Component {
 	constructor(props) {
 		super(props);
@@ -191,7 +195,7 @@ class SensorsView extends React.Component {
 
 	renderSensor(sensor) {
 		return (
-			<div key={sensor.id} className="product-card" style={
+			<div key={sensor.id} className='product-card' style={
 				/* 
 					Color-code for rooms:
 						RED    -> more than 85% full
@@ -203,7 +207,7 @@ class SensorsView extends React.Component {
 				sensor.curr_people >= parseInt(sensor.maxpeople*0.55) ? {'backgroundColor': '#ffee75', 'color': '#7c5407'} :
 				{'backgroundColor': 'lightgreen', 'color': '#435e55'}
 			}>
-  				<div className="product-details">
+  				<div className='product-details'>
     				<h1>{sensor.name}</h1>
     				<p><b><i>At floor:</i></b> {sensor.floor}</p>
 					<p><b><i>Type:</i></b> {sensor.roomtype}</p>
@@ -226,6 +230,7 @@ class SensorsView extends React.Component {
 		)
 	}
 }
+
 
 class Building extends React.Component {
 	constructor(props) {

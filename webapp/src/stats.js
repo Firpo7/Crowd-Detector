@@ -4,6 +4,7 @@ import Chart from 'chart.js';
 
 import './css/stats.css';
 
+// ===== AUX FUNCTIONS ===== \\
 function buildAllRequest(timeOption) {
     if (timeOption === TIME_OPTIONS.TODAY || timeOption === TIME_OPTIONS.YESTERDAY)
         return `/getStatistics?optionRange=${timeOption}&op=all&id=`;
@@ -22,6 +23,8 @@ const TIME_OPTIONS = {
     LASTMONTH: 'lastmonth'
 }
 
+
+// ===== COMPONENTS ===== \\
 function RoomData(props) {
     return (
         <div className='roomDataWrapper'>
@@ -41,6 +44,7 @@ function RoomData(props) {
         </div>
     );
 }
+
 
 function OptionCheckboxSelector(props) {
     return (
@@ -69,6 +73,7 @@ function OptionCheckboxSelector(props) {
         </div>
     );
 }
+
 
 class StatsChart extends React.Component {
     constructor(props) {
@@ -264,6 +269,7 @@ class StatsChart extends React.Component {
         );
     }
 }
+
 
 class Stats extends React.Component {
     constructor(props) {

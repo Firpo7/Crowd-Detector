@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 
 import TitleBar, { API } from './common/common.js';
 import Building from './buildings.js';
@@ -27,7 +27,7 @@ class BuildingsView extends React.Component {
 
 	renderBuilding(building) {
 		return (
-			<div key={building.name} className='card text-center text-white bg-info' style={{'width': '18rem', 'display': 'inline-block'}}>
+			<div key={building.name} className='card text-center text-white bg-info cardStyle'>
 				<div className='card-body'>
 					<h5 className='card-title algerian'>{building.name}</h5>
 					<p className='text-white card-text'>Address: {building.address}</p>
@@ -50,18 +50,20 @@ class BuildingsView extends React.Component {
 	}
 }
 
+
 function SearchBar(props) {	
 	return (
 		<div className='wrap'>
 			<div className='search'>
 				<input type='text' id='toSearch' className='searchTerm' placeholder='Search for a building'/>
-				<button type='submit' onClick={() => props.onClick()} className="searchButton">
+				<button type='submit' onClick={() => props.onClick()} className='searchButton'>
 					<i className='fa fa-search'/>
 				</button>
 			</div>
 		</div>
 	);
 }
+
 
 class MainPage extends React.Component {
 	constructor(props) {
