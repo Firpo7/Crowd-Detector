@@ -1,4 +1,29 @@
+# UNIGE Crowd Detector - Web App
+
+This web app is useful to visualize better the data retrieved from the API presented in the */server/app* directory of the project. The website consists of three pages:
+<ul>
+  <li><b><i>/</i></b>: The homepage, here are shown the buildings registered in the server</li>
+  <li><b><i>buildings</i></b>: here are shown the sensors inside a building chosen by the user</li>
+  <li><b><i>stats</i></b>: here are shown some statistics of data collected by the sensor chosen by the user</li>
+</ul>
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+In order to run this component of the project you have to start the server and then fire the following commands from your terminal:
+```
+cd webapp
+npm install     # only the first time
+npm start
+```
+And then from your browser you have to go to `localhost:3000`
+
+There is intentionally no `production build`.
+
+Below an example of the `/building` page:
+![building page](src/imgs/photo1.png)
+
+
+<!-- This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
 
@@ -65,4 +90,4 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 
 ### `npm run build` fails to minify
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify -->
