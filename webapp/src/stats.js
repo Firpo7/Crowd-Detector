@@ -11,6 +11,10 @@ function buildAllRequest(timeOption) {
     return `/getStatistics?optionRange=${timeOption}&op=avg&id=`;
 }
 
+function buildDistinctRequest(timeOption) {
+    return `/getStatistics?optionRange=${timeOption}&op=distinct&id=`;
+}
+
 const TIME_OPTIONS = {
     TODAY: 'today',
     YESTERDAY: 'yesterday',
@@ -78,8 +82,6 @@ class StatsChart extends React.Component {
             timeOption: props.timeOption,
             chart: null,
         };
-
-        console.log(process.env)
     }
 
     componentDidMount() {
@@ -89,7 +91,7 @@ class StatsChart extends React.Component {
     componentDidUpdate() {
         if (this.state.timeOption !== this.props.timeOption) {
             this.setState({timeOption: this.props.timeOption});
-            this.fetchStatistics(this.props.timeOption);
+            this.fetchStatistics(this.props.timeOption, 'line', true);
         }
     }
 
@@ -107,7 +109,7 @@ class StatsChart extends React.Component {
     }
 
     parseTimeOptions(timeOption) {
-        switch(this.state.timeOption) {
+        switch(timeOption) {
             case TIME_OPTIONS.TODAY:
                 return 'Today';
             case TIME_OPTIONS.YESTERDAY:
@@ -121,12 +123,12 @@ class StatsChart extends React.Component {
         }
     }
 
-    setChartsOptions() {
+    setChartsOptions(lineBar) {
         const options = {};
 
         options['title'] = {
             display: true,
-            text: `People in ${this.state.room} ${this.parseTimeOptions(this.state.timeOption)}`,
+            text: (lineBar === 'line' ? '' : 'Different ') + `People in ${this.state.room} ${this.parseTimeOptions(this.state.timeOption)}`,
             fontSize: 24
         };
 
@@ -178,7 +180,7 @@ class StatsChart extends React.Component {
         return options;
     }
 
-    setDataToPlot(statsObj) {
+    setDataToPlot(statsObj, lineBar) {
         const toPlot = {};
         const labels = [];
         const values = [];
@@ -192,10 +194,18 @@ class StatsChart extends React.Component {
         
         toPlot['labels'] = labels;
         toPlot['datasets'] = [
+            lineBar === 'line' ?
             {
                 data: values,
                 label: 'People in the room',
                 borderColor: '#e8c3b9',
+                fill: false
+            } :
+            {
+                data: values,
+                label: 'People in the room',
+                borderColor: '#e8c3b9',
+                backgroundColor: '#36f',
                 fill: false
             }
         ];
@@ -203,24 +213,32 @@ class StatsChart extends React.Component {
         return toPlot;
     }
 
-    fetchStatistics(timeOption) {
-        console.log('FETCHING:', timeOption);
+    fetchStatistics(timeOption, lineBar='line', switched=false) {
+        console.log('FETCHING:', timeOption, lineBar);
 
+        const btn = document.getElementById('distinct-btn');
 
-        fetch(API + buildAllRequest(timeOption) + this.state.id)
+        if (switched || btn.innerHTML === 'CAPACITY')
+            btn.innerHTML = 'DISTINCT';
+        else 
+            btn.innerHTML = 'CAPACITY';
+
+        fetch(API 
+            + (lineBar === 'line' ? buildAllRequest(timeOption) : buildDistinctRequest(timeOption))
+            + this.state.id)
             .then(response => response.json())
             .then(statsObj => {
                 if (statsObj.code === 42) {
                     const context = document.getElementById(this.state.statsChartName);
-                    const toPlot = this.setDataToPlot(statsObj);
-                    const options = this.setChartsOptions();
+                    const toPlot = this.setDataToPlot(statsObj, lineBar);
+                    const options = this.setChartsOptions(lineBar);
                     
                     if (this.state.chart)
                         this.state.chart.destroy();
 
                     this.setState({chart:
                         new Chart(context, {
-                            type: 'line',
+                            type: (lineBar === 'line' ? 'line' : 'bar'),
                             data: toPlot,
                             options: options
                         })
@@ -229,9 +247,20 @@ class StatsChart extends React.Component {
             });
     }
 
+    distinctHandler() {
+        this.fetchStatistics(this.state.timeOption, document.getElementById('distinct-btn').innerHTML === 'DISTINCT' ? 'bar' : 'line');
+    }
+
     render() {
         return (
-            <div className="canvas-containter mx-auto"><canvas id={this.state.statsChartName} className='chart'/></div>
+            <div className="canvas-containter mx-auto">
+                <canvas id={this.state.statsChartName} className='chart'/>
+                <button id='distinct-btn' className='btn-warning' style={
+                    (this.state.timeOption === TIME_OPTIONS.LASTWEEK || this.state.timeOption === TIME_OPTIONS.LASTMONTH) ?
+                    {'marginLeft': '35%', 'marginTop': '2%', 'width': '30%'} :
+                    {'display': 'none'}
+                } onClick={() => this.distinctHandler()}>DISTINCT</button>
+            </div>
         );
     }
 }
