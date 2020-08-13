@@ -208,7 +208,7 @@ class SensorsView extends React.Component {
     				<p><b><i>At floor:</i></b> {sensor.floor}</p>
 					<p><b><i>Type:</i></b> {sensor.roomtype}</p>
 					<p><b><i>People allowed</i></b>: {sensor.maxpeople}</p>
-					{/* <p><b><i>People in room</i></b>: {sensor.curr_people}</p> */}
+					<p><b><i>People in room</i></b>: {sensor.curr_people}</p>
     				<Link to={{
 						pathname: '/stats',
 						state: {sensor}
