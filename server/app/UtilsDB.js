@@ -182,7 +182,7 @@ function checkFloorBuilding(building, floor) {
     getBuildingsFromDB(building)
     .then((rows) => {
       if (!rows.length) reject(`no building found: ${building}`)
-      if (floor > rows[0].maxFloor) reject(`floor too high for building: ${building}`)
+      if (floor > rows[0].numfloors) reject(`floor too high for building: ${building}`)
       resolve()
     })
     .catch((err) => reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }))
