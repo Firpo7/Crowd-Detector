@@ -1,19 +1,14 @@
 'use strict';
 
 const noble  = require('@abandonware/noble');
+const nodebt = require('node-bluetooth');
+
 const fetch = require('node-fetch');
 const APIconstants = require('../server/app/Constants').APIConstants;
-const nodebt = require('node-bluetooth');
 const CronJob = require('cron').CronJob;
-require('dotenv').config()
 
-//let nDevs = 0;
-const devices = new Map();
-const todaysDevices = new Set();
-const private_id = process.env.id
+require('dotenv').config();
 
-let currentNewPeople = 0;
-let currentPeople = 0;
 
 function pushUpdate() {
 	let i = 0;
@@ -22,10 +17,10 @@ function pushUpdate() {
 	});
 	console.log('\n');
 
-	// this prevents to lose people during the query delay
-	currP = currentNewPeople;
-	newP = currentNewPeople;
-	
+	// it prevents to loose people during the query delay
+	let currP = currentNewPeople;
+	let newP = currentNewPeople;
+
 	currentNewPeople = 0;
 	currentPeople = 0;
 	devices.clear();
@@ -34,67 +29,162 @@ function pushUpdate() {
 		{
 				method: 'POST',
 				headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-				body: 'id=' + private_id + '&current=' + currP + '&new=' + newP + '&time=' + new Date()
+				body: 'id=' + private_id + '&current=' + currP + '&new=' + newP + '&time=' + new Date().toISOString()
 		})
-		.then(res => res.json())
+		.then(response => response.json())
 		.then(data => {
 				if (data.code !== 42)
-					console.log('ERROR:', data.code);
+					throw data.code;
 		})
-		.catch(err => console.log(err));
+		.catch(err => console.error('[ERROR (push)]:', err));
 }
 
 
-// node-bluetooth scan
-const device = new nodebt.DeviceINQ();
-device
-	.on('found', (btAddr, localName) => {
-		if (!todaysDevices.has(btAddr)) {
-			todaysDevices.add(btAddr);
-			++currentNewPeople;
+function registerSensor() {
+	fetch(API + APIconstants.API_ENDPOINT_REGISTER_NEW_NODE,
+		{
+			method: 'POST',
+			headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+			body: 'name=' + NAME + '&building=' + BUILDING + '&max_people=' + MAX_PEOPLE + '&floor=' + FLOOR + '&type=' + TYPE + '&token=' + TOKEN
+		})
+		.then(response => response.json())
+		.then(data => {
+			if (data.code === 42) {
+				private_id = data.id;
+				console.log('[OK] Registration successful ===> ID:', data.id);
+				startScanning();
+				return;
+			}
+
+			// if the registration fails
+			throw data.code;
+		})
+		.catch(err => { console.error('[ERROR (register)]:', err); process.exit(); });
+}
+
+
+function checkEnvParameters() {
+	if (!private_id) {
+		console.log('/!\\ Sensor not known, starting the registration...');
+
+		if (!TOKEN) {
+			console.error('[ERROR] A administrator token must be provided !');
+			return false;
 		}
 
-		if (devices.has(btAddr))
-			return;
+		if (!BUILDING) {
+			console.error('[ERROR] A building must be provided !');
+			return false;
+		}
 
-		++currentPeople;
-		devices.set(btAddr, localName);
-		//console.log('\t/FOUND/ -> (' + nDevs++ + ') ' + btAddr + ' ' + localName);
-	}).on('finished', () => {
-		device.scan();	// to enter in a loop to find devices continuously
-	}).scan();
+		if (!NAME) {
+			console.error('[ERROR] A name for the sensor must be provided !');
+			return false;
+		}
 
+		if (!MAX_PEOPLE) {
+			console.error('[ERROR] A capacity for the area must be provided !');
+			return false;
+		}
 
-// @abandonware/noble scan
-noble.on('stateChange', (state) => {
-	if (state !== 'poweredOn')
-		return;
+		if (!FLOOR) {
+			console.error('[ERROR] A floor must be provided !');
+			return false;
+		}
 
-	console.log('Bluetooth detection started at ' + new Date() + '\n');
-	noble.startScanningAsync([], true); // allow repetitions
-});
+		if (!TYPE) {
+			console.error('[ERROR] A type of room must be provided !');
+			return false;
+		}
 
-noble.on('discover', (dev) => {
-	let btAddr = dev.address;
-	let localName = dev.advertisement.localName;
-
-	if (!todaysDevices.has(btAddr)) {
-		todaysDevices.add(btAddr);
-		++currentNewPeople;
+		registerSensor();
+		return true;
 	}
 
-	if (devices.has(btAddr))
-		return;
-
-	++currentPeople;
-	devices.set(btAddr, localName);
-	//console.log('\t|FOUND| -> (' + nDevs++ + ') ' + btAddr + ' ' + localName);
-});
+	console.log('[*] Sensor already registered !');
+	startScanning();
+	return true;
+}
 
 
-// print the devices found every 30 seconds
-setInterval(pushUpdate, 30*1000);
-new CronJob('0 0 0 * * *', function() {
-	//will run every day at 12:00 AM
-	todaysDevices.clear()
-}).start()
+function startScanning() {
+	// node-bluetooth scan
+	const device = new nodebt.DeviceINQ();
+	device
+		.on('found', (btAddr, localName) => {
+			if (!todaysDevices.has(btAddr)) {
+				todaysDevices.add(btAddr);
+				currentNewPeople++;
+			}
+
+			if (devices.has(btAddr))
+				return;
+
+			currentPeople++;
+			devices.set(btAddr, localName);
+
+			//console.log('\t/FOUND/ -> (' + nDevs++ + ') ' + btAddr + ' ' + localName);
+		})
+		.on('finished', () => {
+			device.scan();	// to enter in a loop to find devices continuously
+		})
+		.scan();
+
+
+	// @abandonware/noble scan
+	noble
+		.on('stateChange', state => {
+			if (state !== 'poweredOn')
+				return;
+
+			console.log('[OK] Bluetooth detection started at ' + new Date() + '\n');
+			noble.startScanningAsync([], true); // allow repetitions
+		})
+		.on('discover', dev => {
+			let btAddr = dev.address;
+			let localName = dev.advertisement.localName;
+
+			if (!todaysDevices.has(btAddr)) {
+				todaysDevices.add(btAddr);
+				currentNewPeople++;
+			}
+
+			if (devices.has(btAddr))
+				return;
+
+			currentPeople++;
+			devices.set(btAddr, localName);
+
+			//console.log('\t|FOUND| -> (' + nDevs++ + ') ' + btAddr + ' ' + localName);
+		});
+}
+
+
+// ===== MAIN ===== \\
+const devices = new Map();
+const todaysDevices = new Set();
+
+const API = process.env.API || 'https://localhost:4000';
+//const API = process.env.API || 'https://iot-proj00.herokuapp.com';
+
+var currentNewPeople = 0;
+var currentPeople = 0;
+
+var private_id = process.env.ID;
+
+const NAME = process.env.NAME;
+const TOKEN = process.env.TOKEN;
+const BUILDING = process.env.BUILDING;
+const MAX_PEOPLE = process.env.MAX_PEOPLE;
+const FLOOR = process.env.FLOOR;
+const TYPE = process.env.TYPE;
+
+if (checkEnvParameters()) {
+	// push the devices found every 5 minutes to the database
+	setInterval(pushUpdate, 5*60*1000);
+
+	// every day at 12:00 AM clear the devices found during the day
+	new CronJob('0 0 0 * * *', () => {
+		todaysDevices.clear();
+	}).start();
+}
