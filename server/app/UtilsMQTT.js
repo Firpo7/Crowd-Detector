@@ -5,31 +5,21 @@ const mqttHandler = require('./MqttHandler')
 const port = process.env.PORT || 3000;
 var mqttClient = new mqttHandler(`ws://localhost:${port}`);
 mqttClient.connect();
-
-var topic_subscribed = new Set();
-
-function subscribeToTopic(topic) {
-  if(!(topic_subscribed.has(topic))) {
-    mqttClient.subscribe(topic)
-    topic_subscribed.add(topic)
-  }
-}
+mqttClient.subscribe("ALERTS")
 
 async function publishOnMqtt(topic, data) {
-  let toPromise = function(resolve, reject) {
-    subscribeToTopic(topic)
-    mqttClient.sendMessage(topic, JSON.stringify(data));
-    resolve()
-  }
-  return new Promise(toPromise)
+  mqttClient.sendMessage(topic, JSON.stringify(data));
 }
 
 function publishSensorDataOnMqtt(public_id, data) {
   UtilsDB.getNodeFromDB(public_id)
   .then((sensor_info) => {
-    data = {...data, name: sensor_info.name}
-    publishOnMqtt(sensor_info.building+"-"+sensor_info.floor, data)
-    publishOnMqtt(sensor_info.building+"-"+sensor_info.roomtype, data)
+    console.log(JSON.stringify(sensor_info))
+    if(sensor_info.maxpeople <= data.current_people) {
+      delete sensor_info.private_id
+      data = {...data, ...sensor_info}
+      publishOnMqtt("ALERTS", data)
+    }
   })
 }
 

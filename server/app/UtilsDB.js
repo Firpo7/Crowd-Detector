@@ -84,7 +84,7 @@ function getNodeFromDB(public_id) {
         sensor_info = JSON.parse(sensor_info)
         resolve(sensor_info)
       } else {
-        knex.select([knex.ref('public_id').as('id'), 'name', 'floor', 'roomtype', 'building']).from('sensor').where('public_id', public_id).then((rows) => {
+        knex.select(['name', 'floor', 'roomtype', 'building', 'maxpeople']).from('sensor').where('public_id', public_id).then((rows) => {
           if (!rows.length) reject("no sensor found")
           let sensor_info = rows[0]
           redis_client.setex(public_id, 3600, JSON.stringify(sensor_info));
