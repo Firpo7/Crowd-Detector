@@ -2,6 +2,7 @@ const APIconstants = require('./Constants').APIConstants;
 const ParamsCostants = require('./Constants').ParamsConstants;
 const Utils = require('./Utils');
 const UtilsDB = require('./UtilsDB');
+const UtilsMQTT = require('./UtilsMQTT');
 
 
 function registerNewNodeController(req, res) {
@@ -85,13 +86,17 @@ function updateCrowdController(req, res) {
         return
   }
 
-  UtilsDB.getPublicID(req.body.id)
-  .then((public_id) => UtilsDB.insertDataIntoDB('sensor_data', {
-    'sensor_id': public_id,
+  let id;
+  let data = {
     'time': req.body.time,
     'current_people': req.body.current,
     'new_people': req.body.new
-  })).then(() => res.send({code: APIconstants.API_CODE_SUCCESS}) )
+  }
+  UtilsDB.getPublicID(req.body.id)
+  .then((public_id) => {id = public_id})
+  .then(() => UtilsDB.insertDataIntoDB('sensor_data', {...data, sensor_id: id}))
+  .then(() => UtilsMQTT.publishSensorDataOnMqtt(id,{...data, sensor_id: id}))
+  .then(() => res.send({code: APIconstants.API_CODE_SUCCESS}) )
   .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
 }
 

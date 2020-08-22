@@ -1,12 +1,20 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const ws = require('websocket-stream');
 const ClientAPI = require('./APIClient')
 const ServerAPI = require('./APIServer')
 const APIconstants = require('./Constants').APIConstants
 
-const app = express()
+const path = require("path");
+const aedes = require("aedes")();
+
+
+const app = express();
+var httpServer = require("http").createServer(app);
+ws.createServer({ server: httpServer }, aedes.handle);
+
 app.use(bodyParser.urlencoded({extended: true}))
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3000;
 
 function endpointLogger() {
   return (req, _, next) => {
@@ -54,7 +62,6 @@ app.post(APIconstants.API_ENDPOINT_UPDATE_CROWD, (req, res) => {
   ServerAPI.updateCrowd(req, res)
 })
 
-
-app.listen(port, () => {
-  console.log(`listening on port ${ port }`)
-})
+httpServer.listen(port, () => {
+  console.log(`listening on port ${ port }`);
+});

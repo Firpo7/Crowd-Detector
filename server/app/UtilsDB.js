@@ -73,7 +73,30 @@ function getPublicID(private_id) {
   return new Promise(toPromise)
 }
 
+// get a single sensor from DB
+function getNodeFromDB(public_id) {
+  let toPromise = function(resolve, reject) {
+    redis_client.get(public_id, (err, sensor_info) => {
+      if (err) { reject(err) }
+      
+      //if no match found in redis
+      if (sensor_info != null) {
+        sensor_info = JSON.parse(sensor_info)
+        resolve(sensor_info)
+      } else {
+        knex.select(['name', 'floor', 'roomtype', 'building', 'maxpeople']).from('sensor').where('public_id', public_id).then((rows) => {
+          if (!rows.length) reject("no sensor found")
+          let sensor_info = rows[0]
+          redis_client.setex(public_id, 3600, JSON.stringify(sensor_info));
+          resolve(sensor_info)
+        }).catch((err) => { reject(err) })
+      }
+    });
+  }
+  return new Promise(toPromise)
+}
 
+// get a multiple sensors from DB, based either on public_ids or floors or roomtypes
 function getNodesFromDB(building, ids=[], floors=[], types=[]) {
   let toPromise = function( resolve, reject ) {
     let query = knex.select([knex.ref('public_id').as('id'), 'name', 'floor', 'roomtype', 'maxpeople']).from('sensor')
@@ -223,6 +246,7 @@ exports.insertDataIntoDB = insertDataIntoDB;
 exports.deleteFromDB = deleteFromDB;
 exports.deleteFromCache = deleteFromCache;
 exports.getPublicID = getPublicID;
+exports.getNodeFromDB = getNodeFromDB;
 exports.getNodesFromDB = getNodesFromDB;
 exports.getBuildingsFromDB = getBuildingsFromDB;
 exports.getSimpleStatisticsFromDB = getSimpleStatisticsFromDB;
