@@ -96,10 +96,7 @@ function showMenu(ctx) {
         throw data.code;
       } else {
         buildings.splice(0,buildings.length)
-        for (let i = 0; i < data.buildings.length; ++i) {
-          buildings.push([data.buildings[i].name])
-        }
-        //buildings.push(...data.buildings.map(a => a.name))
+        buildings.push(...data.buildings.map(a => a.name))
         menuMiddleware.replyToContext(ctx)
       }
   })
@@ -135,6 +132,7 @@ bot.command('subscribe', async ctx => {
       if (!rows.length) {
         ctx.reply("Execute /start please");
       } else {
+        ctx.session.page = 1
         showMenu(ctx)
       }
     }).catch((err)=> console.log(err));
