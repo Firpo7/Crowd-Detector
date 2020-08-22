@@ -28,7 +28,7 @@ Insert the $DBPASSWORD, then:
 
 ### Sensor:
 * ```git clone``` this repo
-* run ```node raspberry/bluetooth.js```
+* run ```node sensor/sensor.js```
 
 For the registration to the server the node needs to have a valid token.
 
