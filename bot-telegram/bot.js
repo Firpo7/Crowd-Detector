@@ -191,8 +191,13 @@ mqttClient.on('message', function (topic, message) {
 
 async function startup() {
   await createUsersTable()
-	await bot.launch()
-	console.log(new Date(), 'Bot started as', bot.options.username)
+  await bot.launch()
+  if (bot.options.username) {
+    console.log(new Date(), 'Bot started as', bot.options.username)
+  } else {
+    console.log("ERROR CONNECTING TO BOT TELEGRAM API");
+    process.exit(1)
+  }
 }
 
 startup()
