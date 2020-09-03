@@ -63,8 +63,8 @@ menu.select('select', buildings, {
       .then(() => ctx.reply(`You are now subscribed to: ${key} 🏢🌳`))
       .then(() => ctx.session.selectedKey = key)
       .then(() => true)
-      .catch((err)=> console.log(err));
-    }).catch((err)=> console.log(err));
+      .catch((err)=> console.error(err));
+    }).catch((err)=> console.error(err));
   },
   isSet: (ctx, key) => {
     if (ctx.session.selectedKey) {
@@ -79,8 +79,8 @@ menu.select('select', buildings, {
             return rows[0].building === key;
           }
           return false;
-        }).catch((err)=> console.log(err));
-      }).catch((err)=> console.log(err));
+        }).catch((err)=> console.error(err));
+      }).catch((err)=> console.error(err));
     }
   }
 })
@@ -119,10 +119,10 @@ bot.start(async (ctx) => {
         knex('users').insert({chatId: chat.id, building: ""})
         .then(() => ctx.reply("Welcome"))
         .then(() => showMenu(ctx))
-        .catch((err)=> console.log(err));
+        .catch((err)=> console.error(err));
       }
-    }).catch((err)=> console.log(err));
-  }).catch((err)=> console.log(err));
+    }).catch((err)=> console.error(err));
+  }).catch((err)=> console.error(err));
 });
 
 bot.command('subscribe', async ctx => {
@@ -135,8 +135,8 @@ bot.command('subscribe', async ctx => {
         ctx.session.page = 1
         showMenu(ctx)
       }
-    }).catch((err)=> console.log(err));
-  }).catch((err)=> console.log(err));
+    }).catch((err)=> console.error(err));
+  }).catch((err)=> console.error(err));
 });
 
 bot.command('unsubscribe', (ctx) => {
@@ -144,14 +144,14 @@ bot.command('unsubscribe', (ctx) => {
     knex('users').where('chatId', chat.id)
     .update({ building: "" })
     .then(() => ctx.reply(`Successfully unsubscribed`))
-    .catch((err)=> console.log(err));
+    .catch((err)=> console.error(err));
   })
 });
 
 bot.use(menuMiddleware.middleware());
 
 bot.catch(error => {
-	console.log('telegraf error', error.response, error.parameters, error.on || error)
+	console.error('telegraf error', error.response, error.parameters, error.on || error)
 });
 
 async function createUsersTable() {
@@ -163,7 +163,7 @@ async function createUsersTable() {
       table.string('building');
       table.primary('chatId');
     }).then(() => console.log("table users created"))
-    .catch((err)=> console.log(err));;
+    .catch((err)=> console.error(err));;
   }
   else {
     console.log("users table already created");
@@ -181,10 +181,10 @@ mqttClient.on('message', function (topic, message) {
           rows[i].chatId,
           formatMex(JSON.parse(message.toString())),
           markup
-        ).catch((err)=> console.log(err));
+        ).catch((err)=> console.error(err));
       }
     }
-  }).catch((err)=> console.log(err));;
+  }).catch((err)=> console.error(err));;
 });
 
 async function startup() {

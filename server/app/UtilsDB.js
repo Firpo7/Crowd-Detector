@@ -66,7 +66,7 @@ function getPublicID(private_id) {
           let public_id = rows[0].public_id
           redis_client.setex(private_id, 3600, public_id);
           resolve(public_id)
-        }).catch((err) => { reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }); console.log(err) })
+        }).catch((err) => { reject({ code: APIconstants.API_CODE_GENERAL_ERROR, err: err }); console.error(err) })
       }
     });
   }
