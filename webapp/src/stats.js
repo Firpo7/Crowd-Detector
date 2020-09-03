@@ -28,9 +28,9 @@ const TIME_OPTIONS = {
 // ===== COMPONENTS ===== \\
 function RoomData(props) {
     return (
-        <Container className="roomDataWrapper mx-auto">
+        <Container className='roomDataWrapper mx-auto'>
             <Row>
-                <Col xs="12" md="6">
+                <Col xs='12' md='6'>
                     <div className='singleData row justify-content-between mx-1 mx-md-3'>
                         <div className='dataTitle px-1 col-5'>FLOOR</div>
                         <div className='dataValue px-1 col-5'>{props.room.floor}</div>
@@ -44,7 +44,7 @@ function RoomData(props) {
                         <div className='dataValue px-1 col-5'>{props.room.roomtype}</div>
                     </div>
                 </Col>
-                <Col xs="12" md="6">
+                <Col xs='12' md='6'>
                     <OptionCheckboxSelector onClick={props.onClick} />
                 </Col>
             </Row>
@@ -56,7 +56,7 @@ function RoomData(props) {
 function OptionCheckboxSelector(props) {
     return (
         <Row>
-            <Col xs="12" sm="10" xl="8" className="mx-auto mb-2">
+            <Col xs='12' sm='10' xl='8' className='mx-auto mb-2'>
                 <div className='form'>
                     <h3>Select time window:</h3>
 
@@ -133,7 +133,7 @@ class StatsChart extends React.Component {
 
         const options = 
             this.state.timeOption === TIME_OPTIONS.TODAY || this.state.timeOption === TIME_OPTIONS.YESTERDAY ?
-            {year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'} :
+            {year: '2-digit', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'} :
             {year: '2-digit', month: 'numeric', day: 'numeric'};
         const dateTimeFormat = new Intl.DateTimeFormat('it-IT', options);
         return dateTimeFormat.format(date);
@@ -209,22 +209,16 @@ class StatsChart extends React.Component {
             values.push(stat.result);
         }
         
+        let dataToPlot = {
+            data: values,
+            label: 'People in the room',
+            borderColor: '#e8c3b9',
+            fill: false
+        };
+
         toPlot['labels'] = labels;
         toPlot['datasets'] = [
-            lineBar === 'line' ?
-            {
-                data: values,
-                label: 'People in the room',
-                borderColor: '#e8c3b9',
-                fill: false
-            } :
-            {
-                data: values,
-                label: 'People in the room',
-                borderColor: '#e8c3b9',
-                backgroundColor: '#36f',
-                fill: false
-            }
+            lineBar === 'line' ? dataToPlot :  {...dataToPlot, backgroundColor: '#36f'}
         ];
 
         return toPlot;
@@ -270,7 +264,7 @@ class StatsChart extends React.Component {
 
     render() {
         return (
-            <div className="canvas-containter mx-auto">
+            <div className='canvas-containter mx-auto'>
                 <canvas id={this.state.statsChartName} className='chart'/>
                 <button id='distinct-btn' className='btn-warning' style={
                     (this.state.timeOption === TIME_OPTIONS.LASTWEEK || this.state.timeOption === TIME_OPTIONS.LASTMONTH) ?
@@ -292,14 +286,12 @@ class Stats extends React.Component {
         this.state = {
             sensor: params,
             timeOption: TIME_OPTIONS.TODAY,
-            chartTitle: ""
+            chartTitle: ''
         };
 
         this.updateTimeOption = this.updateTimeOption.bind(this);
         this.updateChartTitle = this.updateChartTitle.bind(this);
     }
-
-    
 
     updateTimeOption(newTimeOption) {
         this.setState({timeOption: newTimeOption});
@@ -309,7 +301,6 @@ class Stats extends React.Component {
         this.setState({chartTitle: newTitle})
     }
 
-
     render() {
         return (
             <>
@@ -317,15 +308,15 @@ class Stats extends React.Component {
                     text={this.state.sensor.name}
                 />
                 <Container fluid={true}>
-                    <Row className="mt-4 mb-1 mx-auto">
-                        <Col xs="12" className="text-center">
-                            <div className="roomDataWrapper px-3 py-1">
+                    <Row className='mt-4 mb-1 mx-auto'>
+                        <Col xs='12' className='text-center'>
+                            <div className='roomDataWrapper px-3 py-1'>
                                 <span className="p-0">{this.state.chartTitle}</span>
                             </div>
                         </Col>
                     </Row>
                     <Row>
-                        <Col xs="12">
+                        <Col xs='12'>
                             <StatsChart
                                 id={this.state.sensor.id}
                                 name={this.state.sensor.name}
@@ -338,7 +329,7 @@ class Stats extends React.Component {
                         <RoomData
                             room={this.state.sensor}
                             onClick={this.updateTimeOption}
-                            />
+                        />
                     </Row>
                 </Container>
             </>
