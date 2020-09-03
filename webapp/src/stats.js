@@ -30,7 +30,7 @@ function RoomData(props) {
     return (
         <Container className='roomDataWrapper mx-auto'>
             <Row>
-                <Col xs='12' md='6'>
+                <Col>
                     <div className='singleData row justify-content-between mx-1 mx-md-3'>
                         <div className='dataTitle px-1 col-5'>FLOOR</div>
                         <div className='dataValue px-1 col-5'>{props.room.floor}</div>
@@ -43,8 +43,6 @@ function RoomData(props) {
                         <div className='dataTitle px-1 col-5'>TYPE</div>
                         <div className='dataValue px-1 col-5'>{props.room.roomtype}</div>
                     </div>
-                </Col>
-                <Col xs='12' md='6'>
                     <OptionCheckboxSelector onClick={props.onClick} />
                 </Col>
             </Row>
@@ -104,7 +102,7 @@ class StatsChart extends React.Component {
     constructor(props) {
         super(props);
 
-        this.updateChartTitle = props.updateChartTitle
+        //this.updateChartTitle = this.props.updateChartTitle
 
         this.state = {
             id: props.id,
@@ -133,7 +131,7 @@ class StatsChart extends React.Component {
 
         const options = 
             this.state.timeOption === TIME_OPTIONS.TODAY || this.state.timeOption === TIME_OPTIONS.YESTERDAY ?
-            {year: '2-digit', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'} :
+            {hour: 'numeric', minute: 'numeric'} :
             {year: '2-digit', month: 'numeric', day: 'numeric'};
         const dateTimeFormat = new Intl.DateTimeFormat('it-IT', options);
         return dateTimeFormat.format(date);
@@ -142,11 +140,12 @@ class StatsChart extends React.Component {
     setChartsOptions(lineBar) {
         const options = {};
 
-        this.updateChartTitle((lineBar === 'line' ? '' : 'Different ') + `People in ${this.state.room} ${parseTimeOptions(this.state.timeOption)}`)
+        //this.props.updateChartTitle((lineBar === 'line' ? '' : 'Different ') + `People in ${this.state.room} ${parseTimeOptions(this.state.timeOption)}`)
 
         options['title'] = {
             display: true,
-            fontSize: 2
+            fontSize: 10,
+            text: (lineBar === 'line' ? '' : 'Different ') + `People in ${this.state.room} ${parseTimeOptions(this.state.timeOption)}`,
         };
 
         options['scales'] = {
@@ -175,7 +174,7 @@ class StatsChart extends React.Component {
                 }
             }],
             yAxes: [{
-                stacked: true
+                stacked: true,
             }]
         };
 
@@ -304,32 +303,34 @@ class Stats extends React.Component {
     render() {
         return (
             <>
-                <TitleBar 
-                    text={this.state.sensor.name}
-                />
                 <Container fluid={true}>
-                    <Row className='mt-4 mb-1 mx-auto'>
-                        <Col xs='12' className='text-center'>
+                    <Row>
+                        <TitleBar 
+                            text={this.state.sensor.name}
+                        />
+                    </Row>
+                    {/* <Row className='mt-4 mb-1 mx-auto'>
+                        <Col xs='7' className='text-center'>
                             <div className='roomDataWrapper px-3 py-1'>
                                 <span className="p-0">{this.state.chartTitle}</span>
                             </div>
                         </Col>
-                    </Row>
-                    <Row>
-                        <Col xs='12'>
+                    </Row> */}
+                    <Row className='mt-4 mb-1'>
+                        <Col xl='7' xs='12'>
                             <StatsChart
                                 id={this.state.sensor.id}
                                 name={this.state.sensor.name}
                                 timeOption={this.state.timeOption}
                                 updateChartTitle={this.updateChartTitle}
-                                />
+                            />
                         </Col>
-                    </Row>
-                    <Row>
-                        <RoomData
-                            room={this.state.sensor}
-                            onClick={this.updateTimeOption}
-                        />
+                        <Col xl='4' xs='12'>
+                            <RoomData
+                                room={this.state.sensor}
+                                onClick={this.updateTimeOption}
+                            />
+                        </Col>
                     </Row>
                 </Container>
             </>
