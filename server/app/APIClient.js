@@ -14,7 +14,7 @@ function getNodesController(req, res) {
 
   UtilsDB.getNodesFromDB(building=req.query.building, floors=floors, types=types)
   .then((rows) => res.send({code: APIconstants.API_CODE_SUCCESS, listOfNodes: rows}))
-  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err))})
 }
 
 function getBuildingController(req, res) {
@@ -25,7 +25,7 @@ function getBuildingController(req, res) {
 
   UtilsDB.getBuildingsFromDB(req.query.name)
   .then((rows) => res.send({code: APIconstants.API_CODE_SUCCESS, buildings: rows}))
-  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err))})
 }
 
 function getStatisticsController(req, res) {
@@ -38,7 +38,7 @@ function getStatisticsController(req, res) {
 
   UtilsDB.getStatisticsFromDB( req.query.id, req.query.op.toLowerCase(), req.query.optionRange.toLowerCase())
   .then((rows) => res.send({code: APIconstants.API_CODE_SUCCESS, datas: rows}))
-  .catch((err) => {res.send({code: (err.code || APIconstants.API_CODE_GENERAL_ERROR)}) ; if (err.code) console.log(err) })
+  .catch((err) => {res.send({code: (err.code || APIconstants.API_CODE_GENERAL_ERROR)}) ; if (err.code) console.error(err) })
 }
 
 function getSimpleStatisticsController(req, res) {
@@ -50,7 +50,7 @@ function getSimpleStatisticsController(req, res) {
   let ids = Utils.getListOf(req.query.id)
   UtilsDB.getSimpleStatisticsFromDB(ids)
   .then((rows) => res.send({code: APIconstants.API_CODE_SUCCESS, datas: rows}))
-  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err))})
 }
 
 exports.getSimpleStatistics = getSimpleStatisticsController

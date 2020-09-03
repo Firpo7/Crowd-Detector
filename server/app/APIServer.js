@@ -2,6 +2,7 @@ const APIconstants = require('./Constants').APIConstants;
 const ParamsCostants = require('./Constants').ParamsConstants;
 const Utils = require('./Utils');
 const UtilsDB = require('./UtilsDB');
+const UtilsMQTT = require('./UtilsMQTT');
 
 
 function registerNewNodeController(req, res) {
@@ -11,7 +12,7 @@ function registerNewNodeController(req, res) {
        ( parseInt(req.body.max_people) < 1 || parseInt(req.body.floor) < 0 ) ||
       !( Utils.checkParamString(req.body.type) && Utils.checkRoomType(req.body.type) ) ||
       !( Utils.checkParamString(req.body.building) && Utils.checkNameRegex(req.body.building, ParamsCostants.REGEX_PARAM_NAME) )) {
-        console.log('invalid data received:', req.body.type)
+        console.error('invalid data received:', req.body.type)
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -29,7 +30,7 @@ function registerNewNodeController(req, res) {
     'roomtype' : req.body.type,
     'building' : req.body.building
   })).then(() => { res.send({code: APIconstants.API_CODE_SUCCESS, id: private_id}) })
-  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
+  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err)) })
 }
 
 function registerNewBuildingController(req, res) {
@@ -44,7 +45,7 @@ function registerNewBuildingController(req, res) {
     ...(typeof(req.body.address)==='string' && {address : req.body.address}),
     'numfloors' : req.body.numFloors
   }).then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
-  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err))})
 }
 
 function deleteBuildingController(req, res) {
@@ -54,7 +55,7 @@ function deleteBuildingController(req, res) {
   }
   UtilsDB.deleteFromDB('building', {'name': req.body.name})
   .then(() => {res.send({code: APIconstants.API_CODE_SUCCESS})})
-  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err))})
 }
 
 function deleteNodeController(req, res) {
@@ -70,7 +71,7 @@ function deleteNodeController(req, res) {
   .then(() => UtilsDB.deleteFromCache(public_id))
   .then(() => UtilsDB.deleteFromCache(req.body.id))
   .then(() => res.send({code: APIconstants.API_CODE_SUCCESS}))
-  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err))})
+  .catch((err) => {res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err))})
 }
 
 function updateCrowdController(req, res) {
@@ -85,14 +86,18 @@ function updateCrowdController(req, res) {
         return
   }
 
-  UtilsDB.getPublicID(req.body.id)
-  .then((public_id) => UtilsDB.insertDataIntoDB('sensor_data', {
-    'sensor_id': public_id,
+  let id;
+  let data = {
     'time': req.body.time,
     'current_people': req.body.current,
     'new_people': req.body.new
-  })).then(() => res.send({code: APIconstants.API_CODE_SUCCESS}) )
-  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
+  }
+  UtilsDB.getPublicID(req.body.id)
+  .then((public_id) => {id = public_id})
+  .then(() => UtilsDB.insertDataIntoDB('sensor_data', {...data, sensor_id: id}))
+  .then(() => UtilsMQTT.publishSensorDataOnMqtt(id,{...data, sensor_id: id}))
+  .then(() => res.send({code: APIconstants.API_CODE_SUCCESS}) )
+  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err)) })
 }
 
 function manageAdminRequests(req, res, callback) {
@@ -101,7 +106,7 @@ function manageAdminRequests(req, res, callback) {
 
   UtilsDB.checkValidityToken(token)
   .then(() => callback(req, res))
-  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.log((err.err || err)) })
+  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err)) })
 }
 
 

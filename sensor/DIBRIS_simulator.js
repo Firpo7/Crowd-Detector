@@ -3,11 +3,15 @@
 const fetch = require('node-fetch');
 const APIconstants = require('../server/app/Constants').APIConstants;
 const ROOMTYPES = Array.from(require('../server/app/Constants').ParamsConstants.ROOMTYPES.keys());
+require('dotenv').config();
 
-const API = 'http://localhost:4000';
-//const API = 'https://iot-proj00.herokuapp.com';
+const SERVER_HOST = process.env.SERVER_HOST || 'localhost'
+const SERVER_PORT = process.env.SERVER_PORT || 4000
+
+const API = `http://${SERVER_HOST}:${SERVER_PORT}`;
 const DIBRIS = 'DIBRIS-VP';
-const TOKEN = 'AAAAABBBBBCCCCCDDDDDEEEEE';
+const APITOKEN = process.env.APITOKEN;
+
 
 const MAX_PEOPLE_PER_ROOM = {
     'Studying area': 50,
@@ -41,6 +45,10 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
+function daysInMonth(month, year) {
+    return new Date(year, month, 0).getDate();
+}
+
 function createSensorObj(name, floor, type) {
     const pieces = [
         'name=' + name,
@@ -48,7 +56,7 @@ function createSensorObj(name, floor, type) {
         'type=' + type,
         'max_people=' + MAX_PEOPLE_PER_ROOM[name],
         'building=' + DIBRIS,
-        'token=' + TOKEN
+        'token=' + APITOKEN
     ];
     
     return pieces.join('&')
@@ -59,7 +67,7 @@ function createBuildingObj(name, numfloors, address) {
         'name=' + name,
         'numFloors=' + numfloors,
         'address=' + address,
-        'token=' + TOKEN
+        'token=' + APITOKEN
     ];
 
     return pieces.join('&');
@@ -70,7 +78,11 @@ function registerBuildings() {
         createBuildingObj(DIBRIS, 8, 'via Dodecaneso'),
         createBuildingObj('DIBRIS-OP', 6, 'via all Opera Pia'),
         createBuildingObj('CAMPUS SAVONA, PALAZZINA LAGORIO', 2, 'via Magliotto'),
-        createBuildingObj('DISTAV', 7, 'corso Europa')
+        createBuildingObj('DISTAV', 7, 'corso Europa'),
+        createBuildingObj('DIMA', 8, 'via Dodecaneso'),
+        createBuildingObj('DIFI', 8, 'via Dodecaneso'),
+        createBuildingObj('DCCI', 8, 'via Dodecaneso'),
+        createBuildingObj('DAFIST', 8, 'Via Balbi, 2'),
     ];
 
     const promises = [];
@@ -177,9 +189,10 @@ function fillWithSimulatedData() {
     const newPeople = Array(3);
     const adjust = Array(3);  //to simulate a more realistic flow of people
 
+    const thisMonth = new Date().getMonth() + 1; //because it's 0-based numeration
     const yy = 2020;
-    for (let MM=7; MM<=8; MM++) { //july and august
-        for (let dd=1; dd<=31; dd++) {
+    for (let MM=thisMonth-1; MM<=thisMonth; MM++) { //last and current
+        for (let dd=1; dd<=daysInMonth(MM, yy); dd++) {
             currPeople[0] = getRandomInt(MAX_PEOPLE_PER_ROOM[SW1]);
             currPeople[1] = getRandomInt(MAX_PEOPLE_PER_ROOM[LC]);
             currPeople[2] = getRandomInt(MAX_PEOPLE_PER_ROOM[CR2]);
