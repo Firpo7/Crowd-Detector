@@ -1,18 +1,18 @@
 const fetch = require('node-fetch');
 const mqtt = require('mqtt');
-const {Telegraf} = require('telegraf')
-const {MenuTemplate, MenuMiddleware} = require('telegraf-inline-menu')
-const extra = require('telegraf/extra')
-const session = require('telegraf/session')
-const markup = extra.markdown()
+const {Telegraf} = require('telegraf');
+const {MenuTemplate, MenuMiddleware} = require('telegraf-inline-menu');
+const extra = require('telegraf/extra');
+const session = require('telegraf/session');
+const markup = extra.markdown();
 require('dotenv').config();
 
-const token = process.env.TOKEN
-const bot = new Telegraf(token)
-bot.use(session())
+const token = process.env.TOKEN;
+const bot = new Telegraf(token);
+bot.use(session());
 
-const SERVER_PORT = process.env.SERVER_PORT || 4000
-const SERVER_HOST = process.env.SERVER_HOST || 'localhost'
+const SERVER_PORT = process.env.SERVER_PORT || 4000;
+const SERVER_HOST = process.env.SERVER_HOST || 'localhost';
 
 
 function formatMex (data) {
@@ -43,11 +43,11 @@ var mqttClient = mqtt.connect(`ws://${SERVER_HOST}`, settings);
 mqttClient.on('connect', () => {
   console.log(`mqtt client connected`);
 });
-mqttClient.subscribe("ALERTS")
+mqttClient.subscribe("ALERTS");
 
-let menu = new MenuTemplate(() => 'Choose the building you want to subscribe 🏢')
+let menu = new MenuTemplate(() => 'Choose the building you want to subscribe 🏢');
 
-let buildings = []
+let buildings = [];
 menu.select('select', buildings, {
   columns: 2,
   maxRows: 3,
@@ -85,7 +85,7 @@ menu.select('select', buildings, {
   }
 })
 
-const menuMiddleware = new MenuMiddleware('/', menu)
+const menuMiddleware = new MenuMiddleware('/', menu);
 
 function showMenu(ctx) {
   fetch(`http://${SERVER_HOST}:${SERVER_PORT}/getBuildings`, { method: 'GET' })
@@ -108,7 +108,7 @@ bot.use((ctx, next) => {
     console.log('another callbackQuery happened', ctx.callbackQuery.data.length, ctx.callbackQuery.data)
 	}
   return next()
-})
+});
 
 bot.start(async (ctx) => {
   ctx.getChat().then((chat) => {
@@ -123,7 +123,7 @@ bot.start(async (ctx) => {
       }
     }).catch((err)=> console.log(err));
   }).catch((err)=> console.log(err));
-})
+});
 
 bot.command('subscribe', async ctx => {
   ctx.getChat().then((chat) => {
@@ -137,7 +137,7 @@ bot.command('subscribe', async ctx => {
       }
     }).catch((err)=> console.log(err));
   }).catch((err)=> console.log(err));
-})
+});
 
 bot.command('unsubscribe', (ctx) => {
   ctx.getChat().then ((chat) => {
@@ -146,13 +146,13 @@ bot.command('unsubscribe', (ctx) => {
     .then(() => ctx.reply(`Successfully unsubscribed`))
     .catch((err)=> console.log(err));
   })
-})
+});
 
-bot.use(menuMiddleware.middleware())
+bot.use(menuMiddleware.middleware());
 
 bot.catch(error => {
 	console.log('telegraf error', error.response, error.parameters, error.on || error)
-})
+});
 
 async function createUsersTable() {
   const exists = await knex.schema.hasTable('users');
@@ -198,4 +198,4 @@ async function startup() {
   }
 }
 
-startup()
+startup();
