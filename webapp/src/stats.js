@@ -1,4 +1,5 @@
 import React from 'react';
+import { Container, Row, Col } from 'reactstrap';
 import TitleBar, { API } from './common/common.js';
 import Chart from 'chart.js';
 
@@ -27,57 +28,83 @@ const TIME_OPTIONS = {
 // ===== COMPONENTS ===== \\
 function RoomData(props) {
     return (
-        <div className='roomDataWrapper'>
-            <div className='singleData'>
-                <div className='dataTitle'>FLOOR</div>
-                <div className='dataValue'>{props.room.floor}</div>
-            </div>
-            <div className='singleData'>
-                <div className='dataTitle'>OCCUPANCY</div>
-                <div className='dataValue'>{props.room.maxpeople} ppl</div>
-            </div>
-            <div className='singleData'>
-                <div className='dataTitle'>TYPE</div>
-                <div className='dataValue'>{props.room.roomtype}</div>
-            </div>
-            <OptionCheckboxSelector onClick={props.onClick} />
-        </div>
+        <Container className="roomDataWrapper mx-auto">
+            <Row>
+                <Col xs="12" md="6">
+                    <div className='singleData row justify-content-between mx-1 mx-md-3'>
+                        <div className='dataTitle px-1 col-5'>FLOOR</div>
+                        <div className='dataValue px-1 col-5'>{props.room.floor}</div>
+                    </div>
+                    <div className='singleData row justify-content-between mx-1 mx-md-3'>
+                        <div className='dataTitle px-1 col-5'>OCCUPANCY</div>
+                        <div className='dataValue px-1 col-5'>{props.room.maxpeople} ppl</div>
+                    </div>
+                    <div className='singleData row justify-content-between mx-1 mx-md-3'>
+                        <div className='dataTitle px-1 col-5'>TYPE</div>
+                        <div className='dataValue px-1 col-5'>{props.room.roomtype}</div>
+                    </div>
+                </Col>
+                <Col xs="12" md="6">
+                    <OptionCheckboxSelector onClick={props.onClick} />
+                </Col>
+            </Row>
+        </Container>
     );
 }
 
 
 function OptionCheckboxSelector(props) {
     return (
-        <div className='form'>
-            <h3>Select time window:</h3>
+        <Row>
+            <Col xs="12" sm="10" xl="8" className="mx-auto mb-2">
+                <div className='form'>
+                    <h3>Select time window:</h3>
 
-            <div className='inputGroup'>
-                <input id={TIME_OPTIONS.TODAY} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.TODAY)} defaultChecked />
-                <label htmlFor={TIME_OPTIONS.TODAY}>Today</label>
-            </div>
+                    <div className='inputGroup'>
+                        <input id={TIME_OPTIONS.TODAY} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.TODAY)} defaultChecked />
+                        <label htmlFor={TIME_OPTIONS.TODAY}>Today</label>
+                    </div>
 
-            <div className='inputGroup'>
-                <input id={TIME_OPTIONS.YESTERDAY} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.YESTERDAY)} />
-                <label htmlFor={TIME_OPTIONS.YESTERDAY}>Yesterday</label>
-            </div>
+                    <div className='inputGroup'>
+                        <input id={TIME_OPTIONS.YESTERDAY} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.YESTERDAY)} />
+                        <label htmlFor={TIME_OPTIONS.YESTERDAY}>Yesterday</label>
+                    </div>
 
-            <div className='inputGroup'>
-                <input id={TIME_OPTIONS.LASTWEEK} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.LASTWEEK)} />
-                <label htmlFor={TIME_OPTIONS.LASTWEEK}>Last Week</label>
-            </div>
+                    <div className='inputGroup'>
+                        <input id={TIME_OPTIONS.LASTWEEK} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.LASTWEEK)} />
+                        <label htmlFor={TIME_OPTIONS.LASTWEEK}>Last Week</label>
+                    </div>
 
-            <div className='inputGroup'>
-                <input id={TIME_OPTIONS.LASTMONTH} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.LASTMONTH)} />
-                <label htmlFor={TIME_OPTIONS.LASTMONTH}>Last Month</label>
-            </div>
-        </div>
+                    <div className='inputGroup'>
+                        <input id={TIME_OPTIONS.LASTMONTH} name='radio' type='radio' onClick={() => props.onClick(TIME_OPTIONS.LASTMONTH)} />
+                        <label htmlFor={TIME_OPTIONS.LASTMONTH}>Last Month</label>
+                    </div>
+                </div>
+            </Col>
+        </Row>
     );
 }
 
+function parseTimeOptions(timeOption) {
+    switch(timeOption) {
+        case TIME_OPTIONS.TODAY:
+            return 'Today';
+        case TIME_OPTIONS.YESTERDAY:
+            return 'Yesterday';
+        case TIME_OPTIONS.LASTWEEK:
+            return 'Last Week'
+        case TIME_OPTIONS.LASTMONTH:
+            return 'Last Month';
+        default:
+            return '';
+    }
+}
 
 class StatsChart extends React.Component {
     constructor(props) {
         super(props);
+
+        this.updateChartTitle = props.updateChartTitle
 
         this.state = {
             id: props.id,
@@ -107,34 +134,19 @@ class StatsChart extends React.Component {
         const options = 
             this.state.timeOption === TIME_OPTIONS.TODAY || this.state.timeOption === TIME_OPTIONS.YESTERDAY ?
             {year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'} :
-            {year: 'numeric', month: 'numeric', day: 'numeric'};
-        const dateTimeFormat = new Intl.DateTimeFormat('en-GB', options);
-
+            {year: '2-digit', month: 'numeric', day: 'numeric'};
+        const dateTimeFormat = new Intl.DateTimeFormat('it-IT', options);
         return dateTimeFormat.format(date);
-    }
-
-    parseTimeOptions(timeOption) {
-        switch(timeOption) {
-            case TIME_OPTIONS.TODAY:
-                return 'Today';
-            case TIME_OPTIONS.YESTERDAY:
-                return 'Yesterday';
-            case TIME_OPTIONS.LASTWEEK:
-                return 'Last Week'
-            case TIME_OPTIONS.LASTMONTH:
-                return 'Last Month';
-            default:
-                return '';
-        }
     }
 
     setChartsOptions(lineBar) {
         const options = {};
 
+        this.updateChartTitle((lineBar === 'line' ? '' : 'Different ') + `People in ${this.state.room} ${parseTimeOptions(this.state.timeOption)}`)
+
         options['title'] = {
             display: true,
-            text: (lineBar === 'line' ? '' : 'Different ') + `People in ${this.state.room} ${this.parseTimeOptions(this.state.timeOption)}`,
-            fontSize: 24
+            fontSize: 2
         };
 
         options['scales'] = {
@@ -279,15 +291,24 @@ class Stats extends React.Component {
 
         this.state = {
             sensor: params,
-            timeOption: TIME_OPTIONS.TODAY
+            timeOption: TIME_OPTIONS.TODAY,
+            chartTitle: ""
         };
 
         this.updateTimeOption = this.updateTimeOption.bind(this);
+        this.updateChartTitle = this.updateChartTitle.bind(this);
     }
+
+    
 
     updateTimeOption(newTimeOption) {
         this.setState({timeOption: newTimeOption});
     }
+
+    updateChartTitle(newTitle) {
+        this.setState({chartTitle: newTitle})
+    }
+
 
     render() {
         return (
@@ -295,17 +316,31 @@ class Stats extends React.Component {
                 <TitleBar 
                     text={this.state.sensor.name}
                 />
-                <div className='container'>
-                    <RoomData
-                        room={this.state.sensor}
-                        onClick={this.updateTimeOption}
-                    />
-                    <StatsChart
-                        id={this.state.sensor.id}
-                        name={this.state.sensor.name}
-                        timeOption={this.state.timeOption}
-                    />
-                </div>
+                <Container fluid={true}>
+                    <Row className="mt-4 mb-1 mx-auto">
+                        <Col xs="12" className="text-center">
+                            <div className="roomDataWrapper px-3 py-1">
+                                <span className="p-0">{this.state.chartTitle}</span>
+                            </div>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col xs="12">
+                            <StatsChart
+                                id={this.state.sensor.id}
+                                name={this.state.sensor.name}
+                                timeOption={this.state.timeOption}
+                                updateChartTitle={this.updateChartTitle}
+                                />
+                        </Col>
+                    </Row>
+                    <Row>
+                        <RoomData
+                            room={this.state.sensor}
+                            onClick={this.updateTimeOption}
+                            />
+                    </Row>
+                </Container>
             </>
         );
     }
