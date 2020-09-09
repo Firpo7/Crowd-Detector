@@ -118,7 +118,7 @@ function manageAdminRequests(req, res, callback) {
   .catch((err) => { 
     if (/^TOKEN_ERR:.*$/.test(err)) {
       let bad_token = err.split(':')[1]
-      console.log(`unauthorized access with token: ${bad_token}`)
+      console.log(`/!\\ Unauthorized access with token: ${bad_token}`)
       res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS })
       return
     }
