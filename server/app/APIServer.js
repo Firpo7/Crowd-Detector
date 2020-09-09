@@ -7,12 +7,12 @@ const UtilsMQTT = require('./UtilsMQTT');
 
 function registerNewNodeController(req, res) {
   if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ||
-      !( Utils.checkParamString(req.body.max_people) && Utils.checkNumber(req.body.max_people) ) ||
-      !( Utils.checkParamString(req.body.floor) && Utils.checkNumber(req.body.floor) ) ||
-       ( parseInt(req.body.max_people) < 1 || parseInt(req.body.floor) < 0 ) ||
+      !( Utils.checkNumber(req.body.max_people) ) ||
+      !( Utils.checkNumber(req.body.floor) ) ||
+       ( req.body.max_people < 1 || req.body.floor < 0 ) ||
       !( Utils.checkParamString(req.body.type) && Utils.checkRoomType(req.body.type) ) ||
       !( Utils.checkParamString(req.body.building) && Utils.checkNameRegex(req.body.building, ParamsCostants.REGEX_PARAM_NAME) )) {
-        console.error('invalid data received:', req.body.type)
+        console.error('invalid data received:', req.body)
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -35,8 +35,9 @@ function registerNewNodeController(req, res) {
 
 function registerNewBuildingController(req, res) {
   if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ||
-      !( Utils.checkParamString(req.body.numFloors) && Utils.checkNumber(req.body.numFloors) ) ||
-       ( parseInt(req.body.numFloors) < 1 ) ) {
+      !( Utils.checkNumber(req.body.numFloors) ) ||
+       ( req.body.numFloors < 1 ) ) {
+        console.error('invalid data received:', req.body)
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -50,6 +51,7 @@ function registerNewBuildingController(req, res) {
 
 function deleteBuildingController(req, res) {
   if( !( Utils.checkParamString(req.body.name) && Utils.checkNameRegex(req.body.name, ParamsCostants.REGEX_PARAM_NAME) ) ) {
+    console.error('invalid data received:', req.body)
     res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
     return
   }
@@ -60,6 +62,7 @@ function deleteBuildingController(req, res) {
 
 function deleteNodeController(req, res) {
   if( !( Utils.checkParamString(req.body.id) && Utils.checkGUID(req.body.id) ) ) {
+    console.error('invalid data received:', req.body)
     res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
     return
   }
@@ -76,12 +79,13 @@ function deleteNodeController(req, res) {
 
 function updateCrowdController(req, res) {
   if( !( Utils.checkParamString(req.body.id) && Utils.checkGUID(req.body.id) ) ||
-      !( Utils.checkParamString(req.body.current) && Utils.checkNumber(req.body.current) ) ||
-      !( Utils.checkParamString(req.body.new) && Utils.checkNumber(req.body.new) ) ||
+      !( Utils.checkNumber(req.body.current) ) ||
+      !( Utils.checkNumber(req.body.new) ) ||
       !( Utils.checkParamString(req.body.time) ) ||
-      ( parseInt(req.body.current) < 0 ) ||
-      ( parseInt(req.body.new) < 0 ) ||
-      ( parseInt(req.body.new) > parseInt(req.body.current) )) {
+      ( req.body.current < 0 ) ||
+      ( req.body.new < 0 ) ||
+      ( req.body.new > req.body.current )) {
+        console.error('invalid data received:', req.body)
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -102,7 +106,12 @@ function updateCrowdController(req, res) {
 
 function manageAdminRequests(req, res, callback) {
   let token = req.body.token
-  if(!token) { res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS }); return }
+  
+  if(!token) { 
+    console.error('/!\\ INVALID TOKEN:', req.body.token)
+    res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS })
+    return 
+  }
 
   UtilsDB.checkValidityToken(token)
   .then(() => callback(req, res))

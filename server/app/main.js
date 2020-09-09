@@ -12,8 +12,8 @@ const aedes = require("aedes")();
 const app = express();
 var httpServer = require("http").createServer(app);
 ws.createServer({ server: httpServer }, aedes.handle);
-
-app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 const port = process.env.PORT || 3000;
 
 function endpointLogger() {

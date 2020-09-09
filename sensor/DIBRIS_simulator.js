@@ -1,6 +1,7 @@
 'use strict';
 
 const fetch = require('node-fetch');
+const { time } = require('cron');
 const APIconstants = require('../server/app/Constants').APIConstants;
 const ROOMTYPES = Array.from(require('../server/app/Constants').ParamsConstants.ROOMTYPES.keys());
 require('dotenv').config();
@@ -50,27 +51,23 @@ function daysInMonth(month, year) {
 }
 
 function createSensorObj(name, floor, type) {
-    const pieces = [
-        'name=' + name,
-        'floor=' + floor,
-        'type=' + type,
-        'max_people=' + MAX_PEOPLE_PER_ROOM[name],
-        'building=' + DIBRIS,
-        'token=' + APITOKEN
-    ];
-    
-    return pieces.join('&')
+    return JSON.stringify({
+        name: name,
+        floor: floor,
+        type: type,
+        max_people: MAX_PEOPLE_PER_ROOM[name],
+        building: DIBRIS,
+        token: APITOKEN
+    });
 }
 
 function createBuildingObj(name, numfloors, address) {
-    const pieces = [
-        'name=' + name,
-        'numFloors=' + numfloors,
-        'address=' + address,
-        'token=' + APITOKEN
-    ];
-
-    return pieces.join('&');
+    return JSON.stringify({
+        name: name,
+        numFloors: numfloors,
+        address: address,
+        token: APITOKEN
+    });
 }
 
 function registerBuildings() {
@@ -91,7 +88,7 @@ function registerBuildings() {
             fetch(API + APIconstants.API_ENDPOINT_REGISTER_NEW_BUILDING,
                 {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    headers: {'Content-Type': 'application/json'},
                     body: b
                 })
             .then(res => res.json())
@@ -144,7 +141,7 @@ function registerSensorsAndGetPrivateIds() {
             fetch(API + APIconstants.API_ENDPOINT_REGISTER_NEW_NODE,
                 {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    headers: {'Content-Type': 'application/json'},
                     body: s
                 })
             .then(res => res.json())
@@ -154,7 +151,7 @@ function registerSensorsAndGetPrivateIds() {
                     return;
                 }
 
-                const sensorName = s.split('=')[1].split('&')[0];
+                const sensorName = JSON.parse(s).name; 
                 sensors_ids[sensorName] = data.id;
             })
             .catch(err => console.log(err))
@@ -164,13 +161,21 @@ function registerSensorsAndGetPrivateIds() {
     return Promise.all(promises);
 }
 
-function updatePeopleCount(id, currP, newP, time) {
+function createPeopleCountObj(id, currP, newP, time) {
+    return JSON.stringify({
+        id: id,
+        current: currP,
+        new: newP,
+        time: time
+    });
+}
+
+function updatePeopleCount(jsonBody) {
     fetch(API + APIconstants.API_ENDPOINT_UPDATE_CROWD,
             {
                 method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'id=' + id + '&current=' + currP + '&new=' + newP + 
-                      '&time=' + time
+                headers: {'Content-Type': 'application/json'},
+                body: jsonBody
             })
             .then(res => res.json())
             .then(data => {
@@ -223,9 +228,9 @@ function fillWithSimulatedData() {
     
                     const time = new Date(`${MM}/${dd}/${yy} ${hh}:${mm}`).toISOString();
     
-                    updatePeopleCount(sensors_ids[SW1], currPeople[0], newPeople[0], time);
-                    updatePeopleCount(sensors_ids[LC], currPeople[1], newPeople[1], time);
-                    updatePeopleCount(sensors_ids[CR2], currPeople[2], newPeople[2], time);
+                    updatePeopleCount(createPeopleCountObj(sensors_ids[SW1], currPeople[0], newPeople[0], time));
+                    updatePeopleCount(createPeopleCountObj(sensors_ids[LC], currPeople[1], newPeople[1], time));
+                    updatePeopleCount(createPeopleCountObj(sensors_ids[CR2], currPeople[2], newPeople[2], time));
                 }
             }
         }

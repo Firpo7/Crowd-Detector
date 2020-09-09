@@ -6,7 +6,9 @@ const UtilsDB = require('./UtilsDB');
 
 function getNodesController(req, res) {
   if (!Utils.checkParamString(req.query.building) || !Utils.checkNameRegex(req.query.building, ParamsConstants.REGEX_PARAM_NAME)) {
-    res.send({code: APIconstants.API_CODE_INVALID_DATA}); return;
+    console.error('invalid data received:', req.query)
+    res.send({code: APIconstants.API_CODE_INVALID_DATA})
+    return
   }
 
   let floors = Utils.getListOf(req.query.floor)
@@ -20,7 +22,9 @@ function getNodesController(req, res) {
 function getBuildingController(req, res) {
   // if name it's present, then it should match the REGEX
   if (Utils.checkParamString(req.query.name) && !Utils.checkNameRegex(req.query.name, ParamsConstants.REGEX_PARAM_NAME)) {
-    res.send({code: APIconstants.API_CODE_INVALID_DATA}); return;
+    console.error('invalid data received:', req.query)
+    res.send({code: APIconstants.API_CODE_INVALID_DATA})
+    return
   }
 
   UtilsDB.getBuildingsFromDB(req.query.name)
@@ -32,6 +36,7 @@ function getStatisticsController(req, res) {
   if( !( Utils.checkParamString(req.query.op) && Utils.checkOperation(req.query.op) ) ||
       !( Utils.checkParamString(req.query.optionRange) && Utils.checkOptionRange(req.query.optionRange) ) ||
       !( Utils.checkParamString(req.query.id) && Utils.checkGUID(req.query.id) ) ) {
+        console.error('invalid data received:', req.query)
         res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
         return
   }
@@ -44,6 +49,7 @@ function getStatisticsController(req, res) {
 function getSimpleStatisticsController(req, res) {
   if ( !( (Utils.checkParamString(req.query.id) && Utils.checkGUID(req.query.id))  || 
      (req.query.id instanceof Array && req.query.id.every(Utils.checkGUID)) ) ) {
+    console.error('invalid data received:', req.query)
     res.send ({ code: APIconstants.API_CODE_INVALID_DATA })
     return
   }
