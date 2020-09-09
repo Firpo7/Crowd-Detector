@@ -115,7 +115,14 @@ function manageAdminRequests(req, res, callback) {
 
   UtilsDB.checkValidityToken(token)
   .then(() => callback(req, res))
-  .catch((err) => { res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err)) })
+  .catch((err) => { 
+    if (/^TOKEN_ERR:.*$/.test(err)) {
+      let bad_token = err.split(':')[1]
+      console.log(`unauthorized access with token: ${bad_token}`)
+      res.send({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS })
+      return
+    }
+    res.send({ code: (err.code || APIconstants.API_CODE_GENERAL_ERROR) }); console.error((err.err || err)) })
 }
 
 

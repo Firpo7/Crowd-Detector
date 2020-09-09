@@ -221,7 +221,7 @@ function checkValidityToken(token) {
       //if no match found in redis
       if (validity != null) {
         if (new Date(validity) < new Date()) {
-          reject(`unauthorized access with token: ${token}`)
+          reject(`TOKEN_ERR:${token}`)
           return
         }
         resolve()
@@ -234,7 +234,7 @@ function checkValidityToken(token) {
             resolve() ; return
           }
         }
-        reject(`unauthorized access with token: ${token}`)
+        reject(`TOKEN_ERR:${token}`)
       }).catch((err) => reject({ code: APIconstants.API_CODE_UNAUTHORIZED_ACCESS, err: err }))
     })
   }
