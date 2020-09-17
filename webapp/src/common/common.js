@@ -9,9 +9,9 @@ function TitleBar(props) {
 	return (
 		<div className='opaqueContainer'>
 			<div className='imgtitle'/>
-			<div className='text-center mx-3'>
-				<h1 className='algerian'>{props.text}</h1>
-			</div>
+				<div className='text-center mx-3'>
+					<h1 className='algerian'>{props.text}</h1>
+				</div>
 			<div className='imgtitle d-none d-md-block'/>
 		</div>	
 	);

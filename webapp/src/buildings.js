@@ -5,6 +5,7 @@ import { Picky } from 'react-picky';
 
 import 'react-picky/dist/picky.css';
 import './css/buildings.css';
+import { Container, Row, Col } from 'reactstrap';
 
 
 const FIVE_MINUTES = 5 * 60 * 1000; //in milliseconds
@@ -263,8 +264,10 @@ class Building extends React.Component {
 					let updatedSensors = [];
 					let peopleValuesMap = {};
 
+					let totPeople = 0;
 					peopleObj.datas.forEach(val => {
 						peopleValuesMap[val.sensor_id] = val.current_people;
+						totPeople += val.current_people;
 					});
 
 					sensors.forEach(s => {
@@ -284,8 +287,11 @@ class Building extends React.Component {
 					
 					this.setState({
 						sensors: updatedSensors,
-						sensorsToShow: updatedSensors
+						sensorsToShow: updatedSensors,
+						total: totPeople
 					});
+
+					console.log(totPeople)
 				}
 			}
 		);
@@ -343,6 +349,7 @@ class Building extends React.Component {
 		return (
 			<>
 				<TitleBar text={this.state.building}/>,
+				<TotPeople people={this.state.total}/>
 				<Search 
 					numfloors={this.state.numfloors}
 					onClick={this.updateSensorView}
@@ -351,6 +358,20 @@ class Building extends React.Component {
 			</>
 		);
 	}
+}
+
+function TotPeople(props) {
+	return (
+		<Container fluid={true} className='mb-3'>
+		 	<Row className='justify-content-center'>
+				<Col xs='10' sm='6' md='5' className='mx-auto'>
+			 		<div className='roomDataWrapper px-3 py-1 w-100 text-center'>
+						<span className='p-0'>People in the building now: <b>{props.people}</b></span>
+					</div>
+			 	</Col>
+		 	</Row>
+		</Container>
+	);	
 }
 
 export default Building;
