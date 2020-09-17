@@ -28,7 +28,7 @@ function checkRoomType(roomtype) {
 }
 
 function checkNumber(num) {
-  return /^\d+$/.test(num);
+  return typeof(num) === 'number';
 }
 
 function checkGUID(guid) {

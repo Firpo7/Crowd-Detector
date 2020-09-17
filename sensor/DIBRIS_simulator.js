@@ -1,6 +1,7 @@
 'use strict';
 
 const fetch = require('node-fetch');
+const { time } = require('cron');
 const APIconstants = require('../server/app/Constants').APIConstants;
 const ROOMTYPES = Array.from(require('../server/app/Constants').ParamsConstants.ROOMTYPES.keys());
 require('dotenv').config();
@@ -45,28 +46,28 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
+function daysInMonth(month, year) {
+    return new Date(year, month, 0).getDate();
+}
+
 function createSensorObj(name, floor, type) {
-    const pieces = [
-        'name=' + name,
-        'floor=' + floor,
-        'type=' + type,
-        'max_people=' + MAX_PEOPLE_PER_ROOM[name],
-        'building=' + DIBRIS,
-        'token=' + APITOKEN
-    ];
-    
-    return pieces.join('&')
+    return JSON.stringify({
+        name: name,
+        floor: floor,
+        type: type,
+        max_people: MAX_PEOPLE_PER_ROOM[name],
+        building: DIBRIS,
+        token: APITOKEN
+    });
 }
 
 function createBuildingObj(name, numfloors, address) {
-    const pieces = [
-        'name=' + name,
-        'numFloors=' + numfloors,
-        'address=' + address,
-        'token=' + APITOKEN
-    ];
-
-    return pieces.join('&');
+    return JSON.stringify({
+        name: name,
+        numFloors: numfloors,
+        address: address,
+        token: APITOKEN
+    });
 }
 
 function registerBuildings() {
@@ -87,7 +88,7 @@ function registerBuildings() {
             fetch(API + APIconstants.API_ENDPOINT_REGISTER_NEW_BUILDING,
                 {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    headers: {'Content-Type': 'application/json'},
                     body: b
                 })
             .then(res => res.json())
@@ -140,7 +141,7 @@ function registerSensorsAndGetPrivateIds() {
             fetch(API + APIconstants.API_ENDPOINT_REGISTER_NEW_NODE,
                 {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    headers: {'Content-Type': 'application/json'},
                     body: s
                 })
             .then(res => res.json())
@@ -150,7 +151,7 @@ function registerSensorsAndGetPrivateIds() {
                     return;
                 }
 
-                const sensorName = s.split('=')[1].split('&')[0];
+                const sensorName = JSON.parse(s).name; 
                 sensors_ids[sensorName] = data.id;
             })
             .catch(err => console.log(err))
@@ -160,13 +161,21 @@ function registerSensorsAndGetPrivateIds() {
     return Promise.all(promises);
 }
 
-function updatePeopleCount(id, currP, newP, time) {
+function createPeopleCountObj(id, currP, newP, time) {
+    return JSON.stringify({
+        id: id,
+        current: currP,
+        new: newP,
+        time: time
+    });
+}
+
+function updatePeopleCount(jsonBody) {
     fetch(API + APIconstants.API_ENDPOINT_UPDATE_CROWD,
             {
                 method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'id=' + id + '&current=' + currP + '&new=' + newP + 
-                      '&time=' + time
+                headers: {'Content-Type': 'application/json'},
+                body: jsonBody
             })
             .then(res => res.json())
             .then(data => {
@@ -185,9 +194,10 @@ function fillWithSimulatedData() {
     const newPeople = Array(3);
     const adjust = Array(3);  //to simulate a more realistic flow of people
 
+    const thisMonth = new Date().getMonth() + 1; //because it's 0-based numeration
     const yy = 2020;
-    for (let MM=7; MM<=8; MM++) { //july and august
-        for (let dd=1; dd<=31; dd++) {
+    for (let MM=thisMonth-1; MM<=thisMonth; MM++) { //last and current
+        for (let dd=1; dd<=daysInMonth(MM, yy); dd++) {
             currPeople[0] = getRandomInt(MAX_PEOPLE_PER_ROOM[SW1]);
             currPeople[1] = getRandomInt(MAX_PEOPLE_PER_ROOM[LC]);
             currPeople[2] = getRandomInt(MAX_PEOPLE_PER_ROOM[CR2]);
@@ -204,7 +214,7 @@ function fillWithSimulatedData() {
                             (currPeople[0] - adjust[0] < 0 ? 0 : currPeople[0] - adjust[0]);
     
                     currPeople[1] = 
-                        coin > 50 ? 
+                        coin < 50 ? 
                             (currPeople[1] + adjust[1] > MAX_PEOPLE_PER_ROOM[LC] ? MAX_PEOPLE_PER_ROOM[LC] : currPeople[1] + adjust[1]) :
                             (currPeople[1] - adjust[1] < 0 ? 0 : currPeople[1] - adjust[1]);
 
@@ -218,9 +228,9 @@ function fillWithSimulatedData() {
     
                     const time = new Date(`${MM}/${dd}/${yy} ${hh}:${mm}`).toISOString();
     
-                    updatePeopleCount(sensors_ids[SW1], currPeople[0], newPeople[0], time);
-                    updatePeopleCount(sensors_ids[LC], currPeople[1], newPeople[1], time);
-                    updatePeopleCount(sensors_ids[CR2], currPeople[2], newPeople[2], time);
+                    updatePeopleCount(createPeopleCountObj(sensors_ids[SW1], currPeople[0], newPeople[0], time));
+                    updatePeopleCount(createPeopleCountObj(sensors_ids[LC], currPeople[1], newPeople[1], time));
+                    updatePeopleCount(createPeopleCountObj(sensors_ids[CR2], currPeople[2], newPeople[2], time));
                 }
             }
         }

@@ -28,8 +28,13 @@ function pushUpdate() {
 	fetch(API + APIconstants.API_ENDPOINT_UPDATE_CROWD,
 		{
 				method: 'POST',
-				headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-				body: 'id=' + private_id + '&current=' + currP + '&new=' + newP + '&time=' + new Date().toISOString()
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify({
+					id: private_id,
+					current: currP,
+					new: newP,
+					time: new Date().toISOString()
+				})
 		})
 		.then(response => response.json())
 		.then(data => {
@@ -44,8 +49,15 @@ function registerSensor() {
 	fetch(API + APIconstants.API_ENDPOINT_REGISTER_NEW_NODE,
 		{
 			method: 'POST',
-			headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-			body: 'name=' + NAME + '&building=' + BUILDING + '&max_people=' + MAX_PEOPLE + '&floor=' + FLOOR + '&type=' + TYPE + '&token=' + TOKEN
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+				name: NAME,
+				building: BUILDING,
+				max_people: MAX_PEOPLE,
+				floor: FLOOR,
+				type: TYPE,
+				token: TOKEN
+			})
 		})
 		.then(response => response.json())
 		.then(data => {
