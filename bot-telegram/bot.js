@@ -148,6 +148,15 @@ bot.command('unsubscribe', (ctx) => {
   })
 });
 
+bot.command('stop', (ctx) => {
+  ctx.getChat().then ((chat) => {
+    knex('users').where('chatId', chat.id)
+    .delete()
+    .then(() => ctx.reply(`Successfully stopped`))
+    .catch((err)=> console.error(err));
+  })
+});
+
 bot.use(menuMiddleware.middleware());
 
 bot.catch(error => {
