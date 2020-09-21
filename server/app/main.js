@@ -5,7 +5,6 @@ const ClientAPI = require('./APIClient')
 const ServerAPI = require('./APIServer')
 const APIconstants = require('./Constants').APIConstants
 
-const path = require("path");
 const aedes = require("aedes")();
 
 
