@@ -81,7 +81,7 @@ function checkEnvParameters() {
 		console.log('/!\\ Sensor not known, starting the registration...');
 
 		if (!TOKEN) {
-			console.error('[ERROR] A administrator token must be provided !');
+			console.error('[ERROR] An administrator token must be provided !');
 			return false;
 		}
 
@@ -194,7 +194,7 @@ const TYPE = process.env.TYPE;
 
 if (checkEnvParameters()) {
 	// push the devices found every 5 minutes to the database
-	setInterval(pushUpdate, /*5*60*/5*1000);
+	setInterval(pushUpdate, 5*60*1000);
 
 	// every day at 12:00 AM clear the devices found during the day
 	new CronJob('0 0 0 * * *', () => {
