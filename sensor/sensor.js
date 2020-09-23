@@ -12,6 +12,7 @@ require('dotenv').config();
 
 function pushUpdate() {
 	let i = 0;
+	console.log('DEVICEs DETECTED:');
 	devices.forEach((localName, btAddr) => {
 		console.log(i++ + ') ' + btAddr + ' ' + localName);
 	});
@@ -135,7 +136,7 @@ function startScanning() {
 			currentPeople++;
 			devices.set(btAddr, localName);
 
-			//console.log('\t/FOUND/ -> (' + nDevs++ + ') ' + btAddr + ' ' + localName);
+			//console.log('\t/[NODE-BT] FOUND/ -> (' + currentPeople + ') ' + btAddr + ' ' + localName);
 		})
 		.on('finished', () => {
 			device.scan();	// to enter in a loop to find devices continuously
@@ -167,7 +168,7 @@ function startScanning() {
 			currentPeople++;
 			devices.set(btAddr, localName);
 
-			//console.log('\t|FOUND| -> (' + nDevs++ + ') ' + btAddr + ' ' + localName);
+			//console.log('\t/[NOBLE] FOUND/ -> (' + currentPeople + ') ' + btAddr + ' ' + localName);
 		});
 }
 
@@ -193,7 +194,7 @@ const TYPE = process.env.TYPE;
 
 if (checkEnvParameters()) {
 	// push the devices found every 5 minutes to the database
-	setInterval(pushUpdate, 5*60*1000);
+	setInterval(pushUpdate, /*5*60*/5*1000);
 
 	// every day at 12:00 AM clear the devices found during the day
 	new CronJob('0 0 0 * * *', () => {
