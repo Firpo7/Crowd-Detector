@@ -8,7 +8,11 @@ mqttClient.connect();
 mqttClient.subscribe("ALERTS")
 
 async function publishOnMqtt(topic, data) {
-  mqttClient.sendMessage(topic, JSON.stringify(data));
+  var t = new Date();
+  t.setMinutes(t.getMinutes() - 30);
+  t = new Date(t);
+  if ( new Date(data.time) > t )
+    mqttClient.sendMessage(topic, JSON.stringify(data));
 }
 
 function publishSensorDataOnMqtt(public_id, data) {
