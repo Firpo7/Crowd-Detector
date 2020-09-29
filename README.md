@@ -59,5 +59,5 @@ For the registration to the server the node needs to have a valid token. Remembe
 Remeber to fill with your configurations the `.env` file. Then you can receive real-time information directly on you telegram app when you start the bot.
 
 ## Authors
-* Tiziano Firpo - [*@Firpo7*](https://github.com/Firpo7)
-* Andrea Canepa - [*@A-725-K*](https://github.com/A-725-K)
+* Tiziano Firpo - Computer Science, UNIGE - [*@Firpo7*](https://github.com/Firpo7)
+* Andrea Canepa - Computer Science, UNIGE - [*@A-725-K*](https://github.com/A-725-K)
