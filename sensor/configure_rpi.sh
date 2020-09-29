@@ -1,9 +1,15 @@
 # install all the dependencies
 sudo apt update
-sudo apt install bluetooth bluez libbluetooth-dev libudev-dev
+sudo apt install bluetooth bluez libbluetooth-dev libudev-dev blueman libbluetooth3
 
 # grant node the necessary privileges to read BLE data
-setcap cap_net_raw+eip $(eval readlink -f $(which node))
+sudo setcap cap_net_raw+eip $(eval readlink -f $(which node))
+
+# start and enables bluetooth services
+sudo systemctl start bluetooth
+sudo systemctl enable bluetooth
+sudo systemctl start hciuart
+sudo systemctl enable hciuart
 
 # install the node-modules needed to run the scanner 
 npm install

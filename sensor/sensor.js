@@ -12,6 +12,7 @@ require('dotenv').config();
 
 function pushUpdate() {
 	let i = 0;
+	console.log('DEVICEs DETECTED:');
 	devices.forEach((localName, btAddr) => {
 		console.log(i++ + ') ' + btAddr + ' ' + localName);
 	});
@@ -80,7 +81,7 @@ function checkEnvParameters() {
 		console.log('/!\\ Sensor not known, starting the registration...');
 
 		if (!TOKEN) {
-			console.error('[ERROR] A administrator token must be provided !');
+			console.error('[ERROR] An administrator token must be provided !');
 			return false;
 		}
 
@@ -135,7 +136,7 @@ function startScanning() {
 			currentPeople++;
 			devices.set(btAddr, localName);
 
-			//console.log('\t/FOUND/ -> (' + nDevs++ + ') ' + btAddr + ' ' + localName);
+			//console.log('\t/[NODE-BT] FOUND/ -> (' + currentPeople + ') ' + btAddr + ' ' + localName);
 		})
 		.on('finished', () => {
 			device.scan();	// to enter in a loop to find devices continuously
@@ -167,7 +168,7 @@ function startScanning() {
 			currentPeople++;
 			devices.set(btAddr, localName);
 
-			//console.log('\t|FOUND| -> (' + nDevs++ + ') ' + btAddr + ' ' + localName);
+			//console.log('\t/[NOBLE] FOUND/ -> (' + currentPeople + ') ' + btAddr + ' ' + localName);
 		});
 }
 
