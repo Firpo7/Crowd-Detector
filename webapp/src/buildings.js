@@ -211,13 +211,13 @@ class SensorsView extends React.Component {
   				<div className='product-details'>
     				<h1>{sensor.name}</h1>
     				<p><b><i>At floor:</i></b> {sensor.floor}</p>
-					<p><b><i>Type:</i></b> {sensor.roomtype}</p>
-					<p><b><i>People allowed</i></b>: {sensor.maxpeople}</p>
-					<p><b><i>People in room</i></b>: {sensor.curr_people}</p>
-    				<Link to={{
-						pathname: '/stats',
-						state: {sensor}
-					}} className='btn button'>Show Statistics</Link>
+						<p><b><i>Type:</i></b> {sensor.roomtype}</p>
+						<p><b><i>People allowed</i></b>: {sensor.maxpeople}</p>
+						<p><b><i>People in room</i></b>: {sensor.curr_people}</p>
+							<Link to={{
+							pathname: '/stats',
+							state: {sensor}
+						}} className='btn button'>Show Statistics</Link>
   				</div>
 			</div>
 		);
